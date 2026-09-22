@@ -219,6 +219,10 @@ def _usable(*cands):
 GRAMMAR_SUFFIXES = ("从句", "状语", "定语", "短语", "结构", "成分")
 # 语义词 → 人话（用于兜底 mod；比「补充前面的动作」具体得多）
 NATURAL = {
+    # 骨架类：兜底也要说清它在主干里的角色
+    "骨架": "全句的主干", "主干": "全句的主干", "主句": "全句的主干",
+    "主谓": "主干的主语和谓语", "分句": "并列的另一条主干",
+    # 修饰类
     "时间": "发生的时间", "地点": "发生的地点", "目的": "目的",
     "原因": "原因", "条件": "条件", "方式": "方式", "范围": "范围",
     "事由": "事由", "时长": "持续多久", "方向": "方向", "起点": "起点",
@@ -250,15 +254,14 @@ def infer_mod(rel, tag, depth, emoji, author_mod):
     """
     if author_mod:
         return author_mod
-    if depth == 0 and emoji in ("🔵", "🟢"):
-        return "全句骨架的一部分"
     act, tgt = MOD_BY_REL.get(emoji, ("补充", "前面的信息"))
+    if emoji == "🔵" and depth > 0:
+        act = "补充"          # 非主干位置的 🔵 不该说成「骨架：…」
     who = _natural(rel, tag) or _usable(rel, tag)
-    if not who:
-        return "%s：%s" % (act, tgt)      # 统一用冒号，避免「骨架全句的主干」这类粘连
-    if who == act:
-        return who          # 避免「并列：并列」「转折：转折」这类重复
-    return "%s：%s" % (act, who)
+    if who:
+        return who if who == act else "%s：%s" % (act, who)
+    # 只有拿不到任何标签信息时，才退回纯类别描述
+    return "%s：%s" % (act, tgt)
 
 
 def strip_role_emoji(s):
@@ -345,34 +348,48 @@ def build_branches(metas):
 INFER_LAYOUT = True
 
 # 这些标签算「骨架」：它们作为主干并列展开，不往右缩进
-SPINE_WORDS = ("主句", "分句", "主谓", "主语", "谓语", "祈使", "并列", "短句",
-               "开场", "插入语", "倒装", "形式主语", "被动谓语", "从句主句",
-               "祝词", "语气词", "强调")
+SPINE_WORDS = ("骨架", "主干", "主句", "分句", "主谓", "主语", "谓语", "祈使",
+               "并列", "短句", "开场", "插入语", "倒装", "形式主语", "被动谓语",
+               "从句主句", "祝词", "语气词", "强调", "主题", "主旨")
 
 
 def is_spine(tag):
     return any(k in (tag or "") for k in SPINE_WORDS)
 
 
+# 只有「名词性依赖」才继续下钻：定语/同位语、宾语。
+# 时间/地点/方式这类状语彼此是**并列**关系，若也逐层加深会串成假阶梯
+# （today → 占位 → 揭晓 被排成 d2/d3，读起来像层层嵌套，其实都是挂在主干上）。
+CAT_NEST = ("attr", "obj")
+
+
 def infer_depths(tags):
-    """按「骨架 d0、修饰语挂到前一个骨架下、连续修饰语逐层加深」推断层级。
+    """按「骨架 d0、修饰语挂到主干下、名词性依赖才继续下钻」推断层级。
 
     规则是可预期的近似，不是句法分析：
     - 骨架类标签 → d0；
     - 句首的修饰语（前面还没有骨架）→ d0，避免句子以缩进行开头；
-    - 其余修饰语 → 紧跟骨架时 d1，连续出现则逐层 +1，上限 d3。
-    个别判断（如并列分句被当作修饰语）仍需人工校正，改模块里的第 4 个元素即可。
+    - 紧跟骨架的修饰语 → d1；
+    - 之后再出现的修饰语：只有定语/同位语、宾语这类**名词性依赖**才 +1 下钻，
+      其余仍回 d1（它们是主干的并列修饰语，不是上一块的子成分）；
+    - 深度上限 d3。
+
+    个别判断仍需人工校正——在该句色块里显式写第 4 个元素即可覆盖。
     """
-    out, depth, seen_spine = [], 0, False
+    out, depth, seen = [], 0, False
     for i, tag in enumerate(tags):
         if is_spine(tag):
-            depth, seen_spine = 0, True
-        elif not seen_spine:
+            depth, seen = 0, True
+        elif not seen:
             depth = 0
         elif i == 0 or is_spine(tags[i - 1]):
             depth = 1
         else:
-            depth = min(depth + 1, 3)
+            rel = REL_SEP.split(tag or "")[0].split("+")[0].strip() or (tag or "")
+            if role_cat(infer_emoji(tag, rel), rel, tag) in CAT_NEST:
+                depth = min(depth + 1, 3)
+            else:
+                depth = 1
         out.append(depth)
     return out
 
@@ -406,15 +423,20 @@ def render_sentence(pnum, punct, chunks):
         mod = m["mod"]
         if mod == m["tag"]:
             mod = ""
+        # mod 已经把 tag 说进去了就不必再重复（如「说明：做什么 · 做什么」）
+        tg = m["tag"]
+        if mod and tg and (mod.endswith(tg) or tg in mod):
+            tg = ""
         mod_html = ('<span class="mod">%s</span>' % mod) if mod else ''
+        tg_html = ('<span class="tg">%s</span>' % tg) if tg else ''
         lys.append('<div class="ly d%d">%s'
                    '<span class="chip" style="background:%s">%d</span>'
                    '<span class="role" data-cat="%s" title="%s %s"></span>'
                    '<span class="sg" style="color:%s">%s</span>'
-                   '%s<span class="tg">%s</span>'
+                   '%s%s'
                    '<span class="note">%s</span></div>'
                    % (m["depth"], branch, m["fg"], m["num"], m["cat"],
-                      m["emoji"], m["rel"], m["fg"], m["html"], mod_html, m["tag"], m["note"]))
+                      m["emoji"], m["rel"], m["fg"], m["html"], mod_html, tg_html, m["note"]))
     head = '<span class="pnum">P%d</span>' % pnum if pnum else ''
     return ('<div class="sent">%s%s%s\n<div class="brk">%s</div></div>'
             % (head, " ".join(cks), punct, "".join(lys)))
