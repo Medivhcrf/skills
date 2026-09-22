@@ -41,7 +41,7 @@ REL_EMOJI = {
     "谓语": "🟢", "动作": "🟢", "做什么": "🟢", "系表": "🟢",
     "祈使": "🟢", "被动": "🟢",
     "宾语": "🟠", "表语": "🟠", "双宾": "🟠", "补语": "🟠", "宾补": "🟠",
-    "引语": "🟠", "对象": "🟠",
+    "引语": "🟠", "对象": "🟠", "施事": "🟠", "受事": "🟠", "与事": "🟠",
     "定语": "🟡", "同位": "🟡", "同位语": "🟡", "修饰": "🟡", "补充": "🟡",
     "状语": "🟣", "时间": "🟣", "地点": "🟣", "目的": "🟣", "事由": "🟣",
     "条件": "🟣", "原因": "🟣", "方式": "🟣", "范围": "🟣", "时长": "🟣",
@@ -65,6 +65,7 @@ REL_KEYS = sorted(REL_EMOJI.items(), key=lambda kv: (-len(kv[0]), kv[0]))
 # 复合标签的分隔符：「定语/施事」只取「定语」
 REL_SEP = re.compile(r"[/／|｜、,，;；]")
 TREE = ("├─", "└─", "│", "　")  # ├─ └─ │ 全角空格
+warnings = []  # 内容模块的写法告警（如把语法术语写进了 mod）
 
 
 def supify(t):
@@ -90,19 +91,98 @@ def infer_emoji(tag, rel):
     return "⬜"
 
 
-def norm_chunk(c):
-    """把 3/4/5/6 元组统一成 (text, tag, note, depth, emoji, rel)。
+# 这些字样属于语法术语；`mod` 里出现它们说明写成了语法标签而非「作用于谁」
+GRAMMAR_WORDS = ("从句", "状语", "定语", "谓语", "主语", "宾语", "表语",
+                 "同位语", "分词", "不定式", "动名词", "补语", "插入语")
 
-    向后兼容：3 元组 → depth=0、emoji/rel 自动推断，输出与旧版完全一致。
+# 兜底：把「与上级的关系」翻译成「在给谁补充什么」的人话
+MOD_BY_REL = {
+    "🟣": ("补充", "前面的动作"),
+    "🩵": ("补充", "前面整句的信息"),
+    "🟡": ("限定", "前面的名词"),
+    "🟠": ("交代", "动作落到谁身上"),
+    "🟢": ("说明", "主语做了什么"),
+    "🟤": ("并列", "另起一条主干"),
+    "🔴": ("转折", "把前面的话拐个弯"),
+    "🔵": ("骨架", "全句的主干"),
+}
+# 作者已在 mod 里写过的「关系称呼」，兜底前先去掉，避免「补充：补充：…」
+# 作者已在 mod 里写过的「关系称呼」；命中则直接原样用，不再加前缀
+MOD_LEAD = ("补充", "限定", "交代", "说明", "并列", "转折", "骨架", "修饰",
+            "解释", "回指", "另起", "追加", "强调", "收束")
+
+
+def _is_grammar_only(mod):
+    """判断 mod 是否「只是语法术语」而非「在给谁补充什么」。
+
+    只拦真正的术语堆砌（短、且以术语收尾、又不含任何关系词），
+    像「拐弯之后的真正主语和谓语」这种完整描述不算违规。
     """
-    c = list(c) + [None] * (6 - len(c))
-    text, tag, note, depth, emoji, rel = c[:6]
+    if not mod or any(mod.startswith(x) for x in MOD_LEAD):
+        return False
+    has_term = any(w in mod for w in GRAMMAR_WORDS)
+    if not has_term:
+        return False
+    # 含「关系/作用」类词的，是合格描述
+    if any(k in mod for k in ("谁", "什么", "哪", "时候", "怎么", "为", "给", "对")):
+        return False
+    return len(mod) <= 8
+
+
+def _usable(*cands):
+    """挑一个可以写进人话的候选：非空、且不是语法术语。"""
+    for c in cands:
+        if c and not any(w in c for w in GRAMMAR_WORDS):
+            return c
+    return ""
+
+
+def infer_mod(rel, tag, depth, emoji, author_mod):
+    """`mod` 缺省时的兜底描述——**只有作者没写 mod 时才走到这里**。
+
+    口吻统一为「在给谁补充什么」，不含语法术语。
+    作者写了 mod 就原样使用，绝不加前缀（否则会出现「补充：补充：…」）。
+    """
+    if author_mod:
+        return author_mod
+    if depth == 0 and emoji in ("🔵", "🟢"):
+        return "全句骨架的一部分"
+    act, tgt = MOD_BY_REL.get(emoji, ("补充", "前面的信息"))
+    who = _usable(rel, tag)
+    if not who:
+        return "%s%s" % (act, tgt)
+    if who == act:
+        return who          # 避免「并列：并列」「转折：转折」这类重复
+    return "%s：%s" % (act, who)
+
+
+def norm_chunk(c):
+    """把 3/4/5/6 元组统一成 (text, tag, note, depth, rel, mod, emoji)。
+
+    字段顺序（前 3 个是旧格式，永远不变）：
+        0 text  英文原文
+        1 tag   语法标签（小字参考）
+        2 note  汉语解释
+        3 depth 挂接层级（0 = 骨架）
+        4 rel   与上级的关系名（决定 emoji 与兜底措辞）
+        5 mod   **在给谁补充什么**（主视觉，自然语言）
+        6 emoji 覆盖自动推断的角色标记
+
+    向后兼容：3 元组 → depth=0、rel/mod/emoji 全部自动推断，旧模块无需改动。
+    """
+    c = list(c) + [None] * (7 - len(c))
+    text, tag, note, depth, rel, mod, emoji = c[:7]
     tag = tag or ""
+    depth = int(depth or 0)
     if not rel:
         rel = REL_SEP.split(tag)[0].split("+")[0].strip() or tag
+    if _is_grammar_only(mod):
+        # 提醒：mod 要写「在给谁补充什么」，不是语法术语
+        warnings.append("mod 写成了语法术语：%r（应写「在给谁补充什么」，如「补充：被收养的时间」）" % mod)
     if not emoji:
         emoji = infer_emoji(tag, rel)
-    return (text, tag, note or "", int(depth or 0), emoji, rel)
+    mod = infer_mod(rel, tag, depth, emoji, mod)
+    return (text, tag, note or "", depth, rel, mod, emoji)
 
 
 def build_branches(metas):
@@ -127,12 +207,13 @@ def build_branches(metas):
 def render_sentence(pnum, punct, chunks):
     metas, cks = [], []
     for i, raw in enumerate(chunks):
-        text, tag, note, depth, emoji, rel = norm_chunk(raw)
+        text, tag, note, depth, rel, mod, emoji = norm_chunk(raw)
         bg, fg = PALETTE[i % len(PALETTE)]
         t = supify(text)
         cks.append('<span class="ck" style="background:%s;color:%s">%s</span>' % (bg, fg, t))
         metas.append({"num": i + 1, "tag": tag, "note": note, "depth": depth,
-                      "emoji": emoji, "rel": rel, "bg": bg, "fg": fg, "html": t})
+                      "emoji": emoji, "rel": rel, "mod": mod,
+                      "bg": bg, "fg": fg, "html": t})
 
     # 本层末行标记：看后面还有没有同层或更深层的行
     for i, m in enumerate(metas):
@@ -142,13 +223,19 @@ def render_sentence(pnum, punct, chunks):
     lys = []
     for m, prefix in zip(metas, prefixes):
         branch = ('<span class="tbranch">%s</span>' % prefix) if prefix else ''
+        # 主视觉 = mod（这块在给谁补充信息）；语法术语只作小字参考
+        mod = m["mod"]
+        if mod == m["tag"]:
+            mod = ""
+        mod_html = ('<span class="mod">%s</span>' % mod) if mod else ''
         lys.append('<div class="ly d%d">%s'
                    '<span class="chip" style="background:%s">%d</span>'
                    '<span class="role" title="%s">%s</span>'
-                   '<span class="tg">%s</span><span class="sg" style="color:%s">%s</span>'
+                   '%s<span class="tg">%s</span>'
+                   '<span class="sg" style="color:%s">%s</span>'
                    '<span class="note">%s</span></div>'
                    % (m["depth"], branch, m["bg"], m["num"], m["rel"], m["emoji"],
-                      m["tag"], m["fg"], m["html"], m["note"]))
+                      mod_html, m["tag"], m["fg"], m["html"], m["note"]))
     head = '<span class="pnum">P%d</span>' % pnum if pnum else ''
     return ('<div class="sent">%s%s%s\n<div class="brk">%s</div></div>'
             % (head, " ".join(cks), punct, "".join(lys)))
@@ -297,6 +384,10 @@ def build(content_path, out_path):
 
     io.open(out_path, "w", encoding="utf-8").write(html)
     print("wrote", out_path, len(html), "chars")
+    if warnings:
+        print("\n⚠️  内容模块写法告警 %d 条（不影响生成，但建议改）：" % len(warnings))
+        for w in dict.fromkeys(warnings):   # 去重、保序
+            print("   -", w)
 
 
 if __name__ == "__main__":

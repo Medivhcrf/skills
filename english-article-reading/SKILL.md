@@ -1,6 +1,6 @@
 ---
 name: english-article-reading
-description: 把英语文章做成「全文精读」页时使用：用户给原文/链接/文件/主题，要求精读、逐句分析、词源、修辞、跟读、自测，或要求批量生成英语文章。产出桌面版 HTML + A4 PDF + 手机版 HTML，结构为「背景—全文精读（色块拆解）—重点词源—修辞分析—跟读要点—金句—自测」。触发场景：用户说「精读这篇文章」「把这篇英语文章做成精读」「英语文章」「像 I Have a Dream 那样」「批量生成英语文章」等。
+description: 把英语文章做成「全文精读」页时使用：用户给原文/链接/文件/主题，要求精读、逐句分析、词源、修辞、跟读、自测，或要求批量生成英语文章。产出桌面版 HTML + A4 PDF + 手机版 HTML，结构为「背景—全文精读（分层拆解：每块在给谁补充什么）—重点词源—修辞分析—跟读要点—金句—自测」。触发场景：用户说「精读这篇文章」「把这篇英语文章做成精读」「英语文章」「像 I Have a Dream 那样」「批量生成英语文章」等。
 ---
 
 # 英语文章全文精读 → HTML / PDF / 手机版
@@ -41,8 +41,8 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 对**每个句子**做三件事：正文分色 + 句后分层拆解框 + 汉语解释。三者必须严格对应。
 
 > **英语是「右分支」语言：骨架很短，修饰成分一层层往右挂。**
-> 所以拆解框不只是平铺列表，还要用**缩进 + 树形连线**把「谁挂在谁下面」画出来，
-> 否则读者看不出层级。缩进层级用 `.ly.d1 / .d2 / .d3 / .d4`（每级 20px）。
+> 拆解框要回答的是**「这块在给谁补充什么信息」**，而不是「这是什么语法成分」。
+> 语法术语只作小字索引；主视觉是修饰关系。缩进用 `.ly.d1 / .d2 / .d3 / .d4`（每级 20px）。
 
 ### 2.1 正文分色 `.ck`
 
@@ -63,39 +63,40 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 | 5 | `#ddd6fe` | `#4c1d95` | 核心名词 / 揭示 |
 | 6 | `#fed7aa` | `#7c2d12` | 地点 / 范围 |
 
-> 色块颜色**只保证相邻可辨**，不承载语法含义；真正表意的是拆解框第二列的**角色标记**。
+> 色块颜色**只保证相邻可辨**，不承载语法含义；真正表意的是拆解框第二列的**修饰关系**。
 
-### 2.2 句后拆解框 `.brk`
+### 2.2 句后拆解框 `.brk`（**以「修饰谁」为主**）
 
 紧跟句子后面，放一个 `.brk`，里面每个 `.ly` 对应一个色块，**数量、编号、颜色、文本完全一致**。
-每行结构：`树形连线 + .chip 编号 + .role 角色标记 + .tg 语法角色 + .sg 原文 + .note 汉语解释`。
 
-复句用**缩进**表示挂接层级（`d0` 骨架、`d1` 直接挂骨架、`d2` 再挂一层…）：
+每行结构：`树形连线 + .chip 编号 + .role 角色标记 + .mod 修饰关系 + .tg 语法术语 + .sg 原文 + .note 解释`
 
 ```html
 <div class="brk">
-<div class="ly d0"><span class="chip" style="background:#dbeafe">1</span><span class="role" title="主句">🔵</span><span class="tg">主句</span><span class="sg" style="color:#1e3a8a">She felt very strongly</span><span class="note">骨架只有这四个词。feel 是系动词，用副词 strongly 而非 strong</span></div>
-<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#bbf7d0">2</span><span class="role" title="宾语从句">🩵</span><span class="tg">宾语从句</span><span class="sg" style="color:#14532d">that I should be adopted</span><span class="note">她「坚决认为」的内容；should be adopted 是应然 + 被动</span></div>
-<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#fde68a">3</span><span class="role" title="时间状语">🟣</span><span class="tg">时间状语</span><span class="sg" style="color:#78350f">at birth</span><span class="note">一出生——时间点</span></div>
-<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#fbcfe8">4</span><span class="role" title="施事">🟠</span><span class="tg">施事</span><span class="sg" style="color:#831843">by a lawyer and his wife</span><span class="note">动作执行者；English 把三个介词短语排队右挂</span></div>
+<div class="ly d0"><span class="chip" style="background:#dbeafe">1</span><span class="role" title="骨架">🔵</span><span class="mod">全句的主干</span><span class="tg">主句</span><span class="sg" style="color:#1e3a8a">She felt very strongly</span><span class="note">骨架只有四个词。feel 是系动词，要用副词 strongly</span></div>
+<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#bbf7d0">2</span><span class="role" title="宾语从句">🩵</span><span class="mod">补充：她坚决认定的内容</span><span class="tg">宾语从句</span><span class="sg" style="color:#14532d">that I should be adopted</span><span class="note">should be adopted 是应然 + 被动</span></div>
+<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#fde68a">3</span><span class="role" title="时间">🟣</span><span class="mod">补充：那件「被收养」发生在什么时候</span><span class="tg">时间状语</span><span class="sg" style="color:#78350f">at birth</span><span class="note">一出生——时间点</span></div>
+<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#fbcfe8">4</span><span class="role" title="施事">🟠</span><span class="mod">补充：那件「被收养」由谁来做</span><span class="tg">施事</span><span class="sg" style="color:#831843">by a lawyer and his wife</span><span class="note">三个介词短语排队右挂，汉语要倒过来译</span></div>
 </div>
 ```
 
+- **`.mod` 是主视觉**（深色加粗）：一句话说清「这块在给哪一块、补充什么信息」。
+  写法：**动词开头 + 具体指向**——`补充：…发生的时候` / `限定：是哪个 man` / `交代：动作由谁来做` /
+  `另起一条主干——前面是打算，这里是结果`。**不要只写「时间状语」「宾语从句」这类术语**（脚本会告警）。
+- `.tg` 语法术语（灰色小字）：只当索引，写规范说法即可；与 `.mod` 重复时可省略。
 - `.chip` 的 `background` = 对应 `.ck` 的 `background`（编号 1、2、3…）。
-- `.role` 的 **emoji = 这块与上一级的关系**，取值见下表；写不出来就留 `⬜`（表示待补映射）。
-- `.tbranch` 的树形连线**手写**（`├─` / `└─` / `│` / 全角空格）。同层最后一行用 `└─`；
-  更深层的缩进用 `│` 或全角空格补齐（用生成器时会自动算好，见下）。
-- `.tg` 写语法角色（骨架 / 时间 / 主语+同位 / 谓语 / 定语从句 / 目的 / 转折 / 收束 …）。
+- `.role` 的 **emoji = 这块与上一级的关系**，取值见下表；写不出来会显示 `⬜`。
+- `.tbranch` 树形连线**手写**（`├─` / `└─` / `│` / 全角空格）；用生成器时自动算好。
 - `.sg` 的 `color` 和文本 = 对应 `.ck` 的 `color` 和文本。
-- `.note` 用汉语说清「这块在句中干什么」+ 语法点 / 易错点 / 修辞作用。
+- `.note` 讲语法点 / 易错点 / 修辞作用，**不要重复 `.mod` 已经说过的**。
 
 **角色标记（`.role`）对照表** —— 判不准就按「从句优先于非谓语」定：
 
 | emoji | 用于 |
 | --- | --- |
-| 🔵 | 骨架、主句、主语、主谓、分句一/二/三、倒装、形式主语、开场致谢、祈使之外的短句 |
+| 🔵 | 骨架、主句、主语、主谓、分句一/二/三、倒装、形式主语、开场致谢、短句 |
 | 🟢 | 谓语、动作、系表、祈使、被动谓语 |
-| 🟠 | 宾语、表语、双宾、补语/宾补、引语（直接引语） |
+| 🟠 | 宾语、表语、双宾、补语/宾补、引语（直接引语）、施事 |
 | 🟡 | 定语、同位语、补充修饰 |
 | 🟣 | **非谓语**状语：不定式、分词、动名词、介词短语、时间/地点/目的/原因/方式/条件（短语形式） |
 | 🩵 | **限定从句**：宾语/表语/主语/同位语/定语/状语从句（含时间从句、条件从句、比较从句）、存在句 |
@@ -108,12 +109,17 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 ### 2.3 分层设计要点
 
 1. **先定骨架**：最左边那个独立主谓（通常 2–5 个词）永远 `d0`、标 🔵。
-2. **只标「与上级的关系」**，不要标它的内部分类：`by a lawyer and his wife` 相对 `adopted`
+2. **`mod` 写"给谁补充什么"**，`tag` 只写术语——先写 `mod` 再想 `tag`，顺序别倒。
+3. **只标「与上级的关系」**，不要标它的内部分类：`by a lawyer and his wife` 相对 `adopted`
    是施事（🟠），不必再拆成"介词 + 名词"。
-3. **层级不跳级**：`d2` 必须能找到它上面那层 `d1`，否则缩进会看起来悬空。
-4. **一句话里骨架可以有多个**（并列句）：`so everything was all set` 与主句并列，
+4. **层级不跳级**：`d2` 必须能找到它上面那层 `d1`，否则缩进会看起来悬空。
+5. **一句话里骨架可以有多个**（并列句）：`so everything was all set` 与主句并列，
    也回到 `d0`、标 🟤。
-5. 层级建议**不超过 4 层**（`d0`–`d3`）；真到 4 层以上，考虑拆成两句讲。
+6. 层级建议**不超过 4 层**（`d0`–`d3`）；真到 4 层以上，考虑拆成两句讲。
+
+> **按 `mod` 的写法自查**：读一遍所有 `.mod`，如果读出来的是一串语法名词，
+> 说明写失败了；如果读出来像「这块在告诉我被收养的时间和由谁来做」，就对了。
+
 
 > **只写一次标题**：不要每句重复「句子结构分色 · 色块 ↔ 拆解行 ↔ 汉语解释」。
 > 在第二节标题下放一个 `.legend` 说明一次即可（见模板）。
@@ -170,13 +176,16 @@ BACKGROUND = "背景段落 HTML（可含 <b>、<span class='refrain settle'>…<
 TIPS_INTRO = "跟读要点开头说明（可选）"
 
 # 正文：段落 → 句子 → (句末标点, [ 色块, ... ])
-# 色块 = (英文, 语法标签, 汉语解释)                    ← 旧格式，扁平，层级 0
-#      = (英文, 语法标签, 汉语解释, 层级)               ← 加挂接层级
-#      = (英文, 语法标签, 汉语解释, 层级, 角色emoji)     ← 覆盖自动推断的角色
+# 色块 = (英文, 语法标签, 汉语解释)                              ← 旧格式，扁平，层级 0
+#      = (英文, 语法标签, 汉语解释, 层级)                         ← 加挂接层级
+#      = (英文, 语法标签, 汉语解释, 层级, 关系名, mod)             ← 完整写法（推荐）
+#      = (英文, 语法标签, 汉语解释, 层级, 关系名, mod, emoji)      ← 再覆盖角色 emoji
+#   其中 mod =「这块在给谁补充什么信息」，是主视觉，务必写具体
 PARAS = [
     [(".", [
-        ("I'm honored①", "主语+情感", "honored①：感到荣幸"),
-        ("to be with you today", "不定式状语", "今天和你们在一起", 1),
+        ("I'm honored①", "主语+情感", "honored①：感到荣幸", 0, "骨架", "全句主干"),
+        ("to be with you today", "不定式状语", "to be with 比 with 更庄重",
+         1, "时间", "补充：这份荣幸发生在什么时候"),
     ])],
     # …每个段落一个列表，每句一个 (标点, [色块…])
 ]
@@ -197,8 +206,11 @@ FOOTER     = "页脚文字"     # 可选
 - 每句颜色从六色盘自动循环，**不用手写颜色**。
 - **层级（第 4 个元素）**：`0` = 骨架；`1` = 直接挂骨架；`2` = 再挂一层……省略即 `0`。
   树形连线（`├─`/`└─`/`│`）由脚本按层级自动算，**不用手写**。
-- **角色 emoji（第 5 个元素）**：省略时按语法标签自动推断（见 2.2 对照表）；
+- **角色 emoji（第 7 个元素）**：省略时按语法标签自动推断（见 2.2 对照表）；
   推断不出会显示 `⬜`——看到 `⬜` 说明该标签没被收录，补一个更规范的语法标签即可。
+- **`mod`（第 6 个元素）强烈建议手写**：省略时脚本会用「关系名」兜底生成，
+  但兜底只知道关系类别（如「补充：时间」），**说不出具体修饰了哪一块**，语义会偏泛。
+  只有 3 项的旧模块能照常生成，只是 `mod` 偏模板化——重做该文时补上即可。
 - 缺省的章节（如没有 `QUOTES`）会自动跳过。
 
 ### 命令
@@ -288,6 +300,8 @@ python3 /home/crf/.claude/skills/english-article-reading/gen_audio.py \
 ## 注意事项
 
 - **准确第一**：词源、修辞术语、引文必须真实且与原文一致，不得编造；宁可少讲一个词，不可写错词源。
+- **`mod` 是主视觉**：写「这块在给谁补充什么」（`补充：被收养的时间`），不是写「时间状语」。
+  脚本会对只写语法术语的 `mod` 发告警——把它当 lint 用，别忽略。
 - **三者对齐**：`.ck` 色块、`.chip` 编号、`.sg` 文本必须严格一一对应，否则拆解框会错位。
 - **层级不跳级**：`d2` 上面必须能找到 `d1`。层级是相对**上一行**的挂接关系，不是绝对缩进。
 - **🟣 / 🩵 边界**：非谓语状语（不定式、分词、介词短语）用 🟣；有主谓的限定从句用 🩵。

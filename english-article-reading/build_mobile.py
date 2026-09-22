@@ -123,7 +123,10 @@ MOBILE_CSS = r"""
     border-radius:5px; margin-right:6px; padding:0 3px;
     font-family:'DejaVu Sans',sans-serif; vertical-align:1px;
   }
-  .speech .brk .tg{ color:var(--red); font-weight:bold; font-size:.74rem; margin-right:6px; }
+  .speech .brk .mod{ display:block; margin:5px 0 0; color:#1e293b; font-weight:bold;
+    font-size:.82rem; line-height:1.55; }
+  .speech .brk .tg{ display:inline-block; margin-top:4px; color:#94a3b8; font-size:.68rem;
+    font-weight:normal; }
   .speech .brk .sg{ display:block; margin:4px 0 0; font-size:.9rem; line-height:1.6;
     font-family:'DejaVu Sans','Noto Sans CJK SC',sans-serif; }
   .speech .brk .note{ display:block; margin-top:3px; color:#64748b; font-size:.8rem; line-height:1.6; }

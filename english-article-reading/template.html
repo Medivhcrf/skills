@@ -65,7 +65,11 @@
   .speech .brk .bhead { font-weight: bold; color: #1d4ed8; font-size: 8.2pt; margin-bottom: 2px; }
   .speech .brk .ly { line-height: 1.55; }
   .speech .brk .n { color: #94a3b8; font-weight: bold; font-family: 'DejaVu Sans', monospace; margin-right: 3px; }
-  .speech .brk .tg { color: #b91c1c; font-weight: bold; font-size: 8pt; margin-right: 5px; }
+  /* 语法术语：退为灰色小字，只做参考 */
+  .speech .brk .tg { color: #94a3b8; font-size: 7.4pt; margin-right: 5px; }
+  /* 修饰关系：主视觉 */
+  .speech .brk .mod { color: #1e293b; font-weight: bold; margin-right: 5px; }
+  .speech .brk .mod::after { content: "·"; color: #cbd5e1; font-weight: normal; margin-left: 5px; }
   .speech .brk .sg { color: #111827; font-family: 'DejaVu Sans', sans-serif; margin-right: 5px; }
   .speech .brk .note { color: #64748b; }
   .speech .brk .sg u { text-decoration-color: #f87171; }
