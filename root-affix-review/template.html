@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!--
+  root-affix-review 技能模板（复习用）
+  用法：build_review.py 替换【】占位符 → 写入 /home/crf/english/<日期>-词根词缀复习.html → chrome headless 转 PDF
+  保持 CSS 不变；四个练习分区 + 答案区通过【】占位符注入。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>【标题】</title>
+<style>
+  @page { size: A4; margin: 15mm 14mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans CJK SC', 'Droid Sans Fallback', 'WenQuanYi Zen Hei', sans-serif;
+    font-size: 10.5pt;
+    color: #1f2937;
+    line-height: 1.6;
+  }
+  /* 页眉 */
+  .header {
+    border-bottom: 3px solid #7c3aed;
+    padding-bottom: 9px;
+    margin-bottom: 6px;
+  }
+  .header h1 { font-size: 18pt; color: #5b21b6; letter-spacing: 1px; }
+  .header .meta { color: #6b7280; font-size: 9pt; margin-top: 2px; }
+  .header .meta b { color: #7c3aed; }
+
+  /* 大分区标题 */
+  h2.section {
+    font-size: 12.5pt;
+    color: #5b21b6;
+    margin: 12px 0 7px 0;
+    padding-left: 8px;
+    border-left: 4px solid #7c3aed;
+  }
+  h3.sub {
+    font-size: 11pt;
+    color: #5b21b6;
+    margin: 10px 0 5px 0;
+  }
+
+  /* 每日分组头 */
+  .day-head {
+    background: #f5f3ff;
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin: 8px 0 5px 0;
+    font-size: 10pt;
+    font-weight: bold;
+    color: #5b21b6;
+  }
+
+  /* 清单卡片（复习配色：紫） */
+  .card {
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #7c3aed;
+    border-radius: 6px;
+    padding: 6px 10px 7px 10px;
+    margin-bottom: 7px;
+    page-break-inside: avoid;
+  }
+  .card .rh { margin-bottom: 3px; }
+  .card .num {
+    display: inline-block;
+    width: 16px; height: 16px;
+    background: #7c3aed; color: #fff;
+    border-radius: 50%;
+    text-align: center; line-height: 16px;
+    font-size: 9pt; font-weight: bold;
+    margin-right: 5px;
+  }
+  .card .root { font-size: 12pt; font-weight: bold; color: #5b21b6; font-family: 'DejaVu Sans', sans-serif; }
+  .card .mean { color: #4b5563; }
+  .card .words { font-size: 9.5pt; }
+  .card .words b { color: #111827; }
+  .card .evo2 { font-size: 8.5pt; color: #b45309; margin-top: 2px; }
+  .card .u {
+    margin-top: 3px;
+    background: #f5f3ff;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 9pt;
+    color: #5b21b6;
+  }
+  .card .u b { color: #4c1d95; }
+
+  /* 词缀卡片（绿色区分） */
+  .card.affix { border-left-color: #059669; }
+  .card.affix .num { background: #059669; }
+  .card.affix .root { color: #065f46; }
+  .card.affix .u { background: #ecfdf5; color: #065f46; }
+  .card.affix .u b { color: #065f46; }
+
+  /* 练习题 */
+  .q, .a {
+    font-size: 10pt;
+    padding: 2px 0 2px 22px;
+    position: relative;
+  }
+  .q .qn, .a .qn {
+    position: absolute; left: 0;
+    display: inline-block;
+    width: 16px; height: 16px;
+    background: #e0e7ff; color: #4338ca;
+    border-radius: 50%;
+    text-align: center; line-height: 16px;
+    font-size: 8.5pt; font-weight: bold;
+  }
+  .qt { font-size: 8.5pt; color: #9ca3af; margin-left: 6px; display: inline; }
+
+  /* 答案区 */
+  .a .qn { background: #d1fae5; color: #047857; }
+  .a-key {
+    font-size: 10pt;
+    background: #f0fdf4;
+    border: 1px dashed #059669;
+    border-radius: 5px;
+    padding: 5px 9px;
+    color: #065f46;
+  }
+
+  /* 配对 */
+  .match { display: flex; gap: 24px; page-break-inside: avoid; }
+  .mcol { flex: 1; }
+  .m-row { font-size: 10pt; padding: 1.5px 0; }
+  .mno {
+    display: inline-block;
+    min-width: 18px; height: 16px;
+    background: #ede9fe; color: #5b21b6;
+    border-radius: 4px;
+    text-align: center; line-height: 16px;
+    font-size: 8.5pt; font-weight: bold;
+    margin-right: 6px;
+    padding: 0 3px;
+  }
+
+  .footer {
+    margin-top: 14px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 8.5pt;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>【标题】</h1>
+  <div class="meta">【统计】 ｜ 复习 · 查漏补缺</div>
+</div>
+
+<h2 class="section">一、知识清单回顾</h2>
+【清单内容】
+
+<h2 class="section">二、填词练习（根据词根与释义写单词）</h2>
+【填词内容】
+
+<h2 class="section">三、例句挖空（填出例句中被挖掉的单词）</h2>
+【挖空内容】
+
+<h2 class="section">四、配对练习（把词根与释义连起来）</h2>
+【配对内容】
+
+<h2 class="section">答案区</h2>
+【答案内容】
+
+<div class="footer">词根词缀复习 · 学而时习之 · 不亦说乎 👋</div>
+
+</body>
+</html>

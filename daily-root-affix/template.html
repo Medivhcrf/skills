@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!--
+  daily-root-affix 技能模板
+  用法：替换【】占位符 → 写入 /home/crf/english/<日期>.html → chrome headless 转 PDF
+  保持 CSS 不变；10 张卡片通过【卡片内容】注入。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>词根词缀每日积累 · Day【序号】</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans CJK SC', 'Droid Sans Fallback', 'WenQuanYi Zen Hei', sans-serif;
+    font-size: 10.5pt;
+    color: #1f2937;
+    line-height: 1.65;
+  }
+  /* 页眉 */
+  .header {
+    border-bottom: 3px solid #2563eb;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+  }
+  .header h1 { font-size: 19pt; color: #1e3a8a; letter-spacing: 1px; }
+  .header .meta { color: #6b7280; font-size: 9.5pt; margin-top: 2px; }
+  .header .meta b { color: #2563eb; }
+
+  /* 分区标题 */
+  h2.section {
+    font-size: 12.5pt;
+    color: #1e3a8a;
+    margin: 14px 0 8px 0;
+    padding-left: 8px;
+    border-left: 4px solid #2563eb;
+  }
+
+  /* 词根卡片 */
+  .card {
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #2563eb;
+    border-radius: 6px;
+    padding: 8px 12px 9px 12px;
+    margin-bottom: 9px;
+    page-break-inside: avoid;
+  }
+  .card .root-head { margin-bottom: 4px; }
+  .card .num {
+    display: inline-block;
+    width: 17px; height: 17px;
+    background: #2563eb; color: #fff;
+    border-radius: 50%;
+    text-align: center; line-height: 17px;
+    font-size: 9pt; font-weight: bold;
+    margin-right: 6px;
+  }
+  .card .root { font-size: 12.5pt; font-weight: bold; color: #1e3a8a; font-family: 'DejaVu Sans', sans-serif; }
+  .card .meaning { color: #4b5563; }
+  .card .trick {
+    display: block;
+    color: #047857;
+    font-size: 9pt;
+    margin-top: 1px;
+  }
+  /* 词源与演化 */
+  .card .etym {
+    display: block;
+    margin-top: 3px;
+    font-size: 9pt;
+    color: #6d28d9;
+  }
+  .card .etym .lab, .card .evo .lab { font-weight: bold; }
+  .card .evo {
+    display: block;
+    margin-top: 1px;
+    font-size: 9pt;
+    color: #b45309;
+  }
+  .card ul { list-style: none; padding: 0; }
+  .card li {
+    padding: 1px 0;
+    font-size: 10.5pt;
+  }
+  .card li b { color: #111827; }
+  .card .note { color: #9ca3af; font-size: 9pt; }
+  .card .usage {
+    margin-top: 4px;
+    background: #eff6ff;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 9.5pt;
+    color: #1e40af;
+  }
+  .card .usage b { color: #1e3a8a; }
+
+  /* 深度辨析块（词缀卡片内，浅黄背景） */
+  .card .confuse {
+    margin-top: 5px;
+    background: #fefce8;
+    border: 1px solid #fde047;
+    border-radius: 5px;
+    padding: 5px 9px;
+    font-size: 9pt;
+    color: #854d0e;
+    line-height: 1.6;
+  }
+  .card .confuse .confuse-title {
+    display: block;
+    font-weight: bold;
+    font-size: 9.5pt;
+    color: #92400e;
+    margin-bottom: 3px;
+  }
+  .card .confuse b { color: #78350f; }
+  .card .confuse .sub { color: #a16207; font-weight: bold; }
+
+  /* 多形词根变体块（紫色系） */
+  .card .variant {
+    margin-top: 5px;
+    background: #f5f3ff;
+    border: 1px solid #c4b5fd;
+    border-radius: 5px;
+    padding: 5px 9px;
+    font-size: 9pt;
+    color: #5b21b6;
+    line-height: 1.6;
+  }
+  .card .variant .var-title {
+    display: block;
+    font-weight: bold;
+    font-size: 9.5pt;
+    color: #6d28d9;
+    margin-bottom: 3px;
+  }
+  .card .variant b { color: #5b21b6; }
+
+  /* 同源对照块（琥珀系） */
+  .card .cognate {
+    margin-top: 5px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 5px;
+    padding: 5px 9px;
+    font-size: 9pt;
+    color: #92400e;
+    line-height: 1.6;
+  }
+  .card .cognate .cog-title {
+    display: block;
+    font-weight: bold;
+    font-size: 9.5pt;
+    color: #b45309;
+    margin-bottom: 3px;
+  }
+  .card .cognate b { color: #78350f; }
+
+  /* 词缀卡片（不同色区分） */
+  .card.affix { border-left-color: #059669; }
+  .card.affix .num { background: #059669; }
+  .card.affix .root { color: #065f46; }
+  .card.affix .usage { background: #ecfdf5; color: #065f46; }
+
+  .footer {
+    margin-top: 14px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 8.5pt;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>词根词缀每日积累 · Day 【序号】</h1>
+  <div class="meta">【日期】 ｜ 【统计信息】 ｜ 附词源与演化</div>
+</div>
+
+【卡片内容】
+
+<div class="footer">词根词缀每日积累 · 每天 10 个 · 明天见 👋</div>
+
+</body>
+</html>

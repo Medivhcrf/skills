@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<!--
+  english-article-reading 技能模板（桌面 / A4 版）
+  用法：把【】占位符替换为内容 → 写入 /home/crf/english/<日期>-<标题>.html
+       → chrome headless 转 PDF → 再跑 build_mobile.py 生成手机版。
+  CSS 保持不变；正文分色规则见 SKILL.md。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>【标题】 · 精读</title>
+<style>
+  @page { size: A4; margin: 15mm 14mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: 'Noto Sans CJK SC', 'Droid Sans Fallback', 'WenQuanYi Zen Hei', sans-serif;
+    font-size: 9.8pt;
+    color: #1f2937;
+    line-height: 1.62;
+  }
+  .header {
+    border-bottom: 3px solid #b91c1c;
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+  }
+  .header h1 { font-size: 18pt; color: #7f1d1d; letter-spacing: 1px; }
+  .header .sub { font-size: 11pt; color: #b91c1c; margin-top: 2px; font-family: 'DejaVu Sans', sans-serif; }
+  .header .meta { color: #6b7280; font-size: 9pt; margin-top: 2px; }
+  .header .meta b { color: #b91c1c; }
+
+  h2.section {
+    font-size: 12pt;
+    color: #1e3a8a;
+    margin: 13px 0 7px 0;
+    padding-left: 8px;
+    border-left: 4px solid #1e3a8a;
+    page-break-after: avoid;
+  }
+
+  .intro {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 7px 11px;
+    margin-bottom: 9px;
+    font-size: 9pt;
+    color: #7f1d1d;
+  }
+  .intro b { color: #b91c1c; }
+
+  .speech {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 9px;
+  }
+  .speech p { margin: 6px 0; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', sans-serif; }
+  .speech .sline { margin: 4px 0; }
+  .speech .brk {
+    margin: 3px 0 6px 0; padding: 3px 8px 4px 8px;
+    border-left: 3px solid #93c5fd; background: #f8fafc;
+    border-radius: 0 4px 4px 0; font-size: 8.4pt; color: #334155;
+  }
+  .speech .brk .bhead { font-weight: bold; color: #1d4ed8; font-size: 8.2pt; margin-bottom: 2px; }
+  .speech .brk .ly { line-height: 1.55; }
+  .speech .brk .n { color: #94a3b8; font-weight: bold; font-family: 'DejaVu Sans', monospace; margin-right: 3px; }
+  .speech .brk .tg { color: #b91c1c; font-weight: bold; font-size: 8pt; margin-right: 5px; }
+  .speech .brk .sg { color: #111827; font-family: 'DejaVu Sans', sans-serif; margin-right: 5px; }
+  .speech .brk .note { color: #64748b; }
+  .speech .brk .sg u { text-decoration-color: #f87171; }
+
+  .speech .para { margin: 8px 0; }
+  .speech .sent { margin: 3px 0; }
+  .speech .ck { border-radius: 2px; padding: 0 1px; }
+  .speech .sup { font-size: 62%; vertical-align: super; color: #b91c1c; cursor: help; }
+  .speech .chip {
+    display: inline-block; min-width: 12px; height: 12px; line-height: 12px;
+    text-align: center; color: #fff; font-size: 8pt; font-weight: bold;
+    border-radius: 3px; margin-right: 5px; padding: 0 1px; font-family: 'DejaVu Sans', sans-serif;
+  }
+
+  .speech .pnum {
+    color: #9ca3af; font-size: 8pt; font-weight: bold; margin-right: 4px;
+  }
+  .speech .kw {
+    color: #b91c1c; font-weight: bold;
+    border-bottom: 1px dotted #fca5a5;
+  }
+  .speech .sup { color: #b91c1c; font-size: 7.5pt; font-weight: bold; vertical-align: super; }
+
+  .refrain { font-weight: bold; border-radius: 3px; padding: 0 2px; }
+  .refrain.dream { background: #fde68a; color: #78350f; }
+  .refrain.hundred { background: #bae6fd; color: #075985; }
+  .refrain.now { background: #bbf7d0; color: #14532d; }
+  .refrain.satisfied { background: #fbcfe8; color: #831843; }
+  .refrain.goback { background: #fed7aa; color: #7c2d12; }
+  .refrain.ring { background: #ddd6fe; color: #4c1d95; }
+  .refrain.free { background: #fecaca; color: #7f1d1d; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 4px 10px;
+    background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px;
+    padding: 5px 9px; margin-bottom: 7px; font-size: 8.5pt; color: #7c2d12;
+  }
+  .legend .item { padding: 1px 7px; border-radius: 3px; font-weight: bold; }
+
+  .speech .kw { cursor: help; }
+  #tips {
+    position: fixed; display: none; z-index: 999; max-width: 360px;
+    background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #b91c1c;
+    border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.18);
+    padding: 6px 9px; font-size: 8.8pt; line-height: 1.5; color: #1f2937;
+    pointer-events: none;
+  }
+  #tips .tw { font-weight: bold; color: #7f1d1d; font-size: 9.5pt; }
+  #tips .tipa { color: #475569; font-family: 'DejaVu Sans', sans-serif; font-weight: normal; margin-left: 4px; }
+  #tips .te { color: #6d28d9; display: block; margin-top: 2px; }
+  #tips .tm { color: #1e3a8a; display: block; margin-top: 2px; }
+  table#vocab td .ipa { color: #6b7280; font-size: 8pt; font-family: 'DejaVu Sans', sans-serif; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.6pt;
+    margin: 5px 0 9px 0;
+    page-break-inside: avoid;
+  }
+  th {
+    background: #1e3a8a; color: #fff;
+    border: 1px solid #1e3a8a;
+    padding: 3px 6px; text-align: left;
+  }
+  td {
+    border: 1px solid #e5e7eb;
+    padding: 3px 6px; vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f0f4ff; }
+  td b { color: #1e40af; }
+  td .e { color: #6b7280; font-size: 8pt; }
+  td .n { color: #b91c1c; font-weight: bold; }
+
+  .card {
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #b91c1c;
+    border-radius: 6px;
+    padding: 7px 11px 8px 11px;
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+  }
+  .card .head { margin-bottom: 3px; }
+  .card .num {
+    display: inline-block;
+    width: 17px; height: 17px;
+    background: #b91c1c; color: #fff;
+    border-radius: 50%;
+    text-align: center; line-height: 17px;
+    font-size: 9pt; font-weight: bold;
+    margin-right: 6px; vertical-align: 1px;
+  }
+  .card .t { font-size: 11pt; font-weight: bold; color: #7f1d1d; font-family: 'DejaVu Sans', sans-serif; }
+  .card .why {
+    display: block;
+    margin-top: 3px;
+    font-size: 8.8pt;
+    color: #6d28d9;
+    background: #f5f3ff;
+    border-left: 3px solid #a78bfa;
+    border-radius: 3px;
+    padding: 3px 8px;
+  }
+  .card .why b { color: #5b21b6; }
+  .card .usage {
+    margin-top: 4px;
+    background: #eff6ff;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 9.2pt;
+    color: #1e3a8a;
+  }
+  .card .usage b { color: #1e40af; }
+
+  .quiz table.match td:nth-child(1) { width: 55%; }
+  .quiz .qhead {
+    background: #e0e7ff;
+    border-radius: 4px;
+    padding: 3px 9px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 4px;
+  }
+  .quiz .qhead .hint { font-weight: normal; color: #6b7280; font-size: 8.5pt; margin-left: 6px; }
+  .quiz ol.fill { list-style: decimal; padding-left: 22px; }
+  .quiz ol.fill li { margin: 2px 0; font-size: 9.2pt; }
+  .quiz ol.fill li b { color: #b91c1c; }
+  .quiz .bank {
+    background: #f0fdf4;
+    border: 1px dashed #86efac;
+    border-radius: 5px;
+    padding: 4px 9px;
+    font-size: 8.8pt;
+    color: #065f46;
+    margin-bottom: 4px;
+  }
+  .quiz .bank b { color: #047857; }
+
+  .answers {
+    margin-top: 5px;
+    background: #ecfdf5;
+    border: 1px dashed #34d399;
+    border-radius: 5px;
+    padding: 7px 11px;
+    font-size: 9pt;
+    color: #065f46;
+    line-height: 1.8;
+  }
+  .answers .atitle { font-weight: bold; color: #047857; }
+  .answers b { color: #047857; }
+
+  .footer {
+    margin-top: 12px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 8.3pt;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>【标题】</h1>
+  <div class="sub">【副标题：作者 · 年份 · 出处】</div>
+  <div class="meta">【日期】 ｜ 全文精读 · 重点词源 · 修辞分析 · 跟读要点 · 自测</div>
+</div>
+
+<h2 class="section">一、背景（为什么要学这篇）</h2>
+
+<div class="intro">
+【背景：作者与时代、写作/发表场景、本文的语言与修辞特点、为什么值得精读。可点出全篇的关键隐喻系统或重复句式。】
+</div>
+
+<h2 class="section">二、全文精读（重点词已标注①，见词汇表）</h2>
+
+<div class="legend"><span class="item" style="background:#dbeafe;color:#1e3a8a">🧱 色块拆解</span>正文按句子成分分色上色；每句下方拆解框里，<b>色块编号 ↔ 拆解行 ↔ 汉语解释</b>一一对应。</div>
+
+<div class="speech">
+
+  <!-- 每段一个 .para；每句一个 .sent；句内成分用 .ck 色块；句后紧跟 .brk 拆解框 -->
+  <div class="para">
+    <div class="sent"><span class="pnum">P1</span><span class="ck" style="background:#dbeafe;color:#1e3a8a">成分一</span> <span class="ck" style="background:#bbf7d0;color:#14532d">成分二</span> <span class="ck" style="background:#fde68a;color:#78350f">成分三<span class="sup">①</span></span>.
+    <div class="brk"><div class="ly"><span class="chip" style="background:#dbeafe">1</span><span class="tg">骨架</span><span class="sg" style="color:#1e3a8a">成分一</span><span class="note">汉语解释：这块在句中起什么作用</span></div>
+<div class="ly"><span class="chip" style="background:#bbf7d0">2</span><span class="tg">做什么</span><span class="sg" style="color:#14532d">成分二</span><span class="note">汉语解释</span></div>
+<div class="ly"><span class="chip" style="background:#fde68a">3</span><span class="tg">时间</span><span class="sg" style="color:#78350f">成分三①</span><span class="note">汉语解释</span></div></div></div>
+  </div>
+
+  <!-- 重复上面的 .para 结构，直到全文结束。段落之间无需额外分隔。 -->
+
+</div>
+
+<h2 class="section">三、重点词汇词源（①—㉘ 对应正文上标，鼠标悬停正文的 ①②… 即可看词源与释义）</h2>
+
+<table id="vocab">
+  <thead>
+    <tr><th style="width:16%">单词</th><th style="width:44%">词源本义</th><th>在文中的含义</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="n">①</span><b>word</b> <span class="ipa">/wɜːrd/</span></td><td class="e">拉丁 <b>radix</b>「…」（构词拆解）</td><td>文中释义</td></tr>
+    <!-- 重复 <tr>，编号与正文 .sup 一一对应 -->
+  </tbody>
+</table>
+
+<h2 class="section">四、修辞分析（这篇为什么这么动人）</h2>
+
+<div class="card">
+  <div class="head"><span class="num">1</span><span class="t">【修辞名称 · 英文】</span></div>
+  <div class="why">【这一修辞在文中如何运作：引原文、点明重复/对比/隐喻结构，说明效果。】</div>
+  <span class="usage"><b>跟读妙用</b>：【朗读时如何处理它】</span>
+</div>
+
+<!-- 每类修辞一张 .card，可含 .why 与 .usage；排比、隐喻、引喻、对偶、递进等 -->
+
+<h2 class="section">五、跟读要点（模仿录音）</h2>
+
+<div class="intro">【朗读总原则：语速、停顿、升降调、语气词等。】</div>
+
+<table>
+  <thead>
+    <tr><th style="width:24%">要点</th><th>操作建议</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><b>① 【要点名】</b></td><td>【具体操作建议】</td></tr>
+    <!-- 重复 <tr> -->
+  </tbody>
+</table>
+
+<h2 class="section">六、名言金句（建议背诵）</h2>
+
+<div class="card">
+  <div class="head"><span class="num">A</span><span class="t">【英文原句，可用 .refrain 高亮关键词】</span></div>
+  <div class="why">💎 【为什么值得背：修辞点 + 用法】</div>
+</div>
+
+<!-- 每句一张 .card，序号 A、B、C… -->
+
+<h2 class="section">七、自测</h2>
+
+<div class="quiz">
+  <div class="qhead">练习一 · 词源连线<span class="hint">单词 → 词源本义</span></div>
+  <table class="match">
+    <tr><td>1. word</td><td>a. 【词源本义】</td></tr>
+    <!-- 重复 <tr> -->
+  </table>
+</div>
+
+<div class="quiz">
+  <div class="qhead">练习二 · 修辞辨识<span class="hint">指出下列句子用了哪种修辞（可多选）</span></div>
+  <div class="bank"><b>选项</b>：A. 排比 anaphora ｜ B. 对偶 antithesis ｜ C. 隐喻 metaphor ｜ D. 引喻 allusion</div>
+  <ol class="fill">
+    <li>「【原句】」—— <b>___</b></li>
+  </ol>
+</div>
+
+<div class="quiz">
+  <div class="qhead">练习三 · 名句填空<span class="hint">凭记忆补全（先背再看答案）</span></div>
+  <ol class="fill">
+    <li>【挖空原句】<b>___</b> …</li>
+  </ol>
+</div>
+
+<h2 class="section">八、答案</h2>
+
+<div class="answers">
+  <span class="atitle">练习一</span>　1-? ｜ 2-?<br>
+  <span class="atitle">练习二</span>　1 ?<br>
+  <span class="atitle">练习三</span>　1 【答案】
+</div>
+
+<div class="footer">【标题】 ｜ 全文精读 + 词源 + 修辞 + 跟读 ｜ 👋</div>
+
+</body>
+<script>
+(function () {
+  var esc = function (s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  };
+  var tip = document.createElement("div");
+  tip.id = "tips";
+  document.body.appendChild(tip);
+  var map = {};
+  var rows = document.querySelectorAll("#vocab tbody tr");
+  for (var i = 0; i < rows.length; i++) {
+    var n = rows[i].querySelector(".n");
+    var w = rows[i].querySelector("b");
+    var tds = rows[i].querySelectorAll("td");
+    if (!n || !w || tds.length < 3) continue;
+    map[n.textContent.trim()] = {
+      word: w.textContent.trim(),
+      ipa: rows[i].querySelector(".ipa") ? rows[i].querySelector(".ipa").textContent.trim() : "",
+      etym: tds[1].textContent.trim(),
+      mean: tds[2].textContent.trim()
+    };
+  }
+  function closestSup(el) {
+    while (el && el !== document.body) {
+      if (el.classList && el.classList.contains("sup")) return el;
+      el = el.parentNode;
+    }
+    return null;
+  }
+  document.addEventListener("mouseover", function (e) {
+    var sup = closestSup(e.target);
+    if (!sup) { tip.style.display = "none"; return; }
+    var d = map[sup.textContent.trim()];
+    if (!d) return;
+    tip.innerHTML = '<span class="tw">' + esc(sup.textContent.trim()) + " " + esc(d.word) +
+      '</span><span class="tipa">' + esc(d.ipa) + '</span>' +
+      '<span class="te">词源：' + esc(d.etym) +
+      '</span><span class="tm">在演讲中：' + esc(d.mean) + '</span>';
+    tip.style.display = "block";
+  });
+  document.addEventListener("mousemove", function (e) {
+    if (tip.style.display === "none") return;
+    var x = e.clientX + 14, y = e.clientY + 16;
+    var r = tip.getBoundingClientRect();
+    if (x + r.width > window.innerWidth - 6) x = e.clientX - r.width - 12;
+    if (y + r.height > window.innerHeight - 6) y = e.clientY - r.height - 12;
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  });
+  document.addEventListener("mouseout", function (e) {
+    if (!closestSup(e.target)) tip.style.display = "none";
+  });
+})();
+</script>
+</html>
