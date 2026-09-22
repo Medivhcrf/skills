@@ -34,6 +34,38 @@ PALETTE = [
 ]
 CIRC = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚"
 
+# 「与上级的关系」→ 角色标记（emoji）。颜色随语义，不再随序号循环。
+REL_EMOJI = {
+    "骨架": "🔵", "主语": "🔵", "主句": "🔵", "主谓": "🔵", "分句": "🔵",
+    "分句一": "🔵", "分句二": "🔵", "分句三": "🔵", "倒装": "🔵", "形式主语": "🔵",
+    "谓语": "🟢", "动作": "🟢", "做什么": "🟢", "系表": "🟢",
+    "祈使": "🟢", "被动": "🟢",
+    "宾语": "🟠", "表语": "🟠", "双宾": "🟠", "补语": "🟠", "宾补": "🟠",
+    "引语": "🟠", "对象": "🟠",
+    "定语": "🟡", "同位": "🟡", "同位语": "🟡", "修饰": "🟡", "补充": "🟡",
+    "状语": "🟣", "时间": "🟣", "地点": "🟣", "目的": "🟣", "事由": "🟣",
+    "条件": "🟣", "原因": "🟣", "方式": "🟣", "范围": "🟣", "时长": "🟣",
+    "方向": "🟣", "起点": "🟣", "终点": "🟣", "工具": "🟣", "比较": "🟣",
+    "插入": "🟣", "插入语": "🟣", "独立": "🟣", "不定式": "🟣",
+    "分词": "🟣", "动名词": "🟣",
+    "从句": "🩵", "状语从句": "🩵", "定语从句": "🩵", "名词性从句": "🩵",
+    "宾语从句": "🩵", "表语从句": "🩵", "主语从句": "🩵", "同位语从句": "🩵",
+    "存在句": "🩵", "疑问": "🩵",
+    "并列": "🟤", "转折": "🔴", "让步": "🔴", "对比": "🔴", "收束": "🔴",
+    "过渡": "🔴", "结果": "🔴", "判断": "🔴", "结论": "🔴",
+    # 短句类同义标签统一归为骨架
+    "短句": "🔵", "强调": "🔵", "祝词": "🔵", "致谢": "🔵", "语气": "🔵", "虚拟": "🔵",
+    # 实测存在的复合标签，直接钉死其唯一归属
+    "从句主句": "🩵",
+}
+# 兜底：按长度从长到短取第一个「被包含」的键，避免「定语」抢走「定语从句」、
+# 也兼容「非限定定语从句」这类前后缀变体。注意「引语」需排在「直接引语」之后
+# （长度排序已保证），「从句主句」在表中直接钉死。
+REL_KEYS = sorted(REL_EMOJI.items(), key=lambda kv: (-len(kv[0]), kv[0]))
+# 复合标签的分隔符：「定语/施事」只取「定语」
+REL_SEP = re.compile(r"[/／|｜、,，;；]")
+TREE = ("├─", "└─", "│", "　")  # ├─ └─ │ 全角空格
+
 
 def supify(t):
     for ch in CIRC:
@@ -42,15 +74,81 @@ def supify(t):
     return t
 
 
+def infer_emoji(tag, rel):
+    """按「与上级的关系名」推断角色标记；不确定的返回 ⬜（提示作者补映射）。"""
+    for cand in (rel, tag):
+        if not cand:
+            continue
+        c = REL_SEP.split(cand)[0].strip()
+        if not c:
+            continue
+        if c in REL_EMOJI:
+            return REL_EMOJI[c]
+        for key, e in REL_KEYS:
+            if key in c:
+                return e
+    return "⬜"
+
+
+def norm_chunk(c):
+    """把 3/4/5/6 元组统一成 (text, tag, note, depth, emoji, rel)。
+
+    向后兼容：3 元组 → depth=0、emoji/rel 自动推断，输出与旧版完全一致。
+    """
+    c = list(c) + [None] * (6 - len(c))
+    text, tag, note, depth, emoji, rel = c[:6]
+    tag = tag or ""
+    if not rel:
+        rel = REL_SEP.split(tag)[0].split("+")[0].strip() or tag
+    if not emoji:
+        emoji = infer_emoji(tag, rel)
+    return (text, tag, note or "", int(depth or 0), emoji, rel)
+
+
+def build_branches(metas):
+    """(序号, 层级, 是否本层末行) 列表 → 行首树形前缀（用竖线画承接线）。"""
+    out = [""] * len(metas)
+    for i, (num, depth, last) in enumerate(metas):
+        if depth <= 0:
+            continue
+        parts = []
+        for d in range(1, depth):
+            anc = None
+            for j in range(i - 1, -1, -1):
+                if metas[j][1] == d:
+                    anc = j
+                    break
+            parts.append(TREE[3] if (anc is None or metas[anc][2]) else TREE[2])
+        parts.append(TREE[1] if last else TREE[0])
+        out[i] = "".join(parts)
+    return out
+
+
 def render_sentence(pnum, punct, chunks):
-    cks, lys = [], []
-    for i, (text, tag, note) in enumerate(chunks):
+    metas, cks = [], []
+    for i, raw in enumerate(chunks):
+        text, tag, note, depth, emoji, rel = norm_chunk(raw)
         bg, fg = PALETTE[i % len(PALETTE)]
         t = supify(text)
         cks.append('<span class="ck" style="background:%s;color:%s">%s</span>' % (bg, fg, t))
-        lys.append('<div class="ly"><span class="chip" style="background:%s">%d</span>'
+        metas.append({"num": i + 1, "tag": tag, "note": note, "depth": depth,
+                      "emoji": emoji, "rel": rel, "bg": bg, "fg": fg, "html": t})
+
+    # 本层末行标记：看后面还有没有同层或更深层的行
+    for i, m in enumerate(metas):
+        m["last"] = not any(x["depth"] >= m["depth"] for x in metas[i + 1:])
+    prefixes = build_branches([(m["num"], m["depth"], m["last"]) for m in metas])
+
+    lys = []
+    for m, prefix in zip(metas, prefixes):
+        branch = ('<span class="tbranch">%s</span>' % prefix) if prefix else ''
+        lys.append('<div class="ly d%d">%s'
+                   '<span class="chip" style="background:%s">%d</span>'
+                   '<span class="role" title="%s">%s</span>'
                    '<span class="tg">%s</span><span class="sg" style="color:%s">%s</span>'
-                   '<span class="note">%s</span></div>' % (bg, i + 1, tag, fg, t, note))
+                   '<span class="note">%s</span></div>'
+                   % (m["depth"], branch, m["bg"], m["num"], m["rel"], m["emoji"],
+                      m["tag"], m["fg"], m["html"], m["note"]))
     head = '<span class="pnum">P%d</span>' % pnum if pnum else ''
     return ('<div class="sent">%s%s%s\n<div class="brk">%s</div></div>'
             % (head, " ".join(cks), punct, "".join(lys)))
@@ -134,7 +232,7 @@ def build(content_path, out_path):
 
 <h2 class="section">二、全文精读（重点词已标注①，见词汇表）</h2>
 
-<div class="legend"><span class="item" style="background:#dbeafe;color:#1e3a8a">🧱 色块拆解</span>正文按句子成分分色上色；每句下方拆解框里，<b>色块编号 ↔ 拆解行 ↔ 汉语解释</b>一一对应。</div>
+<div class="legend"><span class="item" style="background:#dbeafe;color:#1e3a8a">🧱 色块拆解</span>正文按句子成分分色；句下拆解框里<b>编号 ↔ 色块 ↔ 汉语解释</b>一一对应。第二列是<b>与上级的关系标记</b>：🔵骨架/主语　🟢谓语/祈使　🟠宾语/表语/引语　🟡定语/同位语　🟣非谓语状语（不定式·分词·介词短语）　🩵限定从句（含时间/条件/定语从句）　🟤并列　🔴转折/过渡。读法：<b>缩进就是挂接层级</b>——往右缩进的成分挂在上一行下面；先抓最左边不缩进的那一两个词（骨架），其余都是往右挂的补充。</div>
 
 %s""" % (TITLE, SUB, DATE, g("BACKGROUND", ""), render_speech(PARAS)))
 

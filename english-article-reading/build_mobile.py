@@ -111,6 +111,12 @@ MOBILE_CSS = r"""
   }
   .speech .brk .ly{ padding:7px 0; border-top:1px dashed #e2e8f0; }
   .speech .brk .ly:first-of-type{ border-top:none; }
+  .speech .brk .ly.d1{ padding-left:14px; }
+  .speech .brk .ly.d2{ padding-left:28px; }
+  .speech .brk .ly.d3{ padding-left:42px; }
+  .speech .brk .ly.d4{ padding-left:56px; }
+  .speech .brk .tbranch{ color:#cbd5e1; white-space:pre; margin-right:1px; }
+  .speech .brk .role{ margin-right:5px; font-size:.76rem; }
   .speech .brk .chip{
     display:inline-block; min-width:17px; height:17px; line-height:17px;
     text-align:center; color:#fff; font-size:.68rem; font-weight:bold;

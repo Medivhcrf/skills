@@ -69,6 +69,16 @@
   .speech .brk .sg { color: #111827; font-family: 'DejaVu Sans', sans-serif; margin-right: 5px; }
   .speech .brk .note { color: #64748b; }
   .speech .brk .sg u { text-decoration-color: #f87171; }
+  /* 分层拆解：缩进 + 承接连线 + 角色标记 */
+  .speech .brk .ly.d1 { padding-left: 20px; }
+  .speech .brk .ly.d2 { padding-left: 40px; }
+  .speech .brk .ly.d3 { padding-left: 60px; }
+  .speech .brk .ly.d4 { padding-left: 80px; }
+  .speech .brk .tbranch {
+    color: #cbd5e1; font-family: 'DejaVu Sans', sans-serif;
+    white-space: pre; margin-right: 1px;
+  }
+  .speech .brk .role { margin-right: 4px; font-size: 8pt; }
 
   .speech .para { margin: 8px 0; }
   .speech .sent { margin: 3px 0; }
