@@ -12,6 +12,12 @@
 .say.speaking{ background:#b91c1c; border-color:#b91c1c; color:#fff; }
 .say svg{ width:14px; height:14px; display:block; }
 
+/* 词源表单词 / 名言金句旁的小号按钮（inline，跟在词或句子后面） */
+#vocab .say, .card .head .say{
+  width:17px; height:17px; margin:0 0 0 7px; vertical-align:-3px;
+}
+#vocab .say svg, .card .head .say svg{ width:10px; height:10px; }
+
 #tts-bar{
   position:fixed; right:16px; bottom:16px; z-index:950;
   display:flex; align-items:center; gap:4px;

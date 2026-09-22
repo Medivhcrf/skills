@@ -81,7 +81,7 @@ RHET = [
      "（三个「不是因为」，最后才给「而是因为」）"
      "<br>· war must be an option sometimes, but it should never be the first option"
      "<br>对偶的力量在于：它不给中间地带，逼听众选边。",
-     "破折号 `—` 前要<b>降调收住</b>，破折号后换一口气、<b>提调起句</b>；"
+     "破折号 <b>—</b> 前要<b>降调收住</b>，破折号后换一口气、<b>提调起句</b>；"
      "「not…」那半句语速可稍快，「there is…」那半句放慢加重。"),
     ("3", "引喻 Allusion",
      "全篇嵌了三处美国人都认得的经典："
@@ -90,7 +90,7 @@ RHET = [
      "<br>· <b>I am my brother's keeper</b> —— 《创世记》该隐的回答，把政治命题提到伦理/信仰层面。"
      "<br>引喻的作用是<b>借权威</b>：不用论证，听众自然接受。",
      "引文部分要读得<b>略慢、略庄重</b>，与前后口语化的句子拉开距离；"
-     "`E pluribus unum` 是拉丁语，读完立刻自己翻译一遍（Out of many, one）。"),
+     "<b>E pluribus unum</b> 是拉丁语，读完立刻自己翻译一遍（Out of many, one）。"),
     ("4", "隐喻 Metaphor",
      "全篇用一组「道路 / 光」的意象贯穿："
      "<br>· <b>crossroads of a nation</b>（十字路口）——开篇定调，暗示选择；"
@@ -101,8 +101,8 @@ RHET = [
      "读意象词时不要停顿解释，让画面自己过去；结尾 darkness / brighter day 要形成"
      "<b>低—高</b>的语调对比。"),
     ("5", "重复 Repetition（情感锚点）",
-     "`I stand here…`（两次）、`Let me be clear. Let me be clear.`（连说两次）、"
-     "`it is that fundamental belief`（连说两次）——"
+     "<b>I stand here…</b>（两次）、<b>Let me be clear. Let me be clear.</b>（连说两次）、"
+     "<b>it is that fundamental belief</b>（连说两次）——"
      "这类原地重复不是修辞技巧，而是<b>给掌声留时间、给情绪留台阶</b>。",
      "连说两次的地方，第二遍要比第一遍<b>更慢、更重</b>，中间留半拍；"
      "不要读成结巴，要读成果断。"),
@@ -116,10 +116,10 @@ TIPS_INTRO = (
 TIPS = [
     ("① 先听再跟", "第一遍只听不动嘴，标出四组排比的位置（Go into / There's not a / the hope of / I believe）。"),
     ("② 排比读成「一组」", "同一组里的各句节奏要一致：重复词轻快带过，新内容加重。整组读完再停顿。"),
-    ("③ 破折号是换气点", "`— there is the United States of America` 前深吸一口气，破折号后提调起句。"),
-    ("④ 长句找主干", "`When we send our young men and women into harm's way, we have a solemn obligation not to fudge the numbers…` —— 先抓 has an obligation，其余都是往右挂的补充。"),
+    ("③ 破折号是换气点", "<b>— there is the United States of America</b> 前深吸一口气，破折号后提调起句。"),
+    ("④ 长句找主干", "<b>When we send our young men and women into harm's way, we have a solemn obligation not to fudge the numbers…</b> —— 先抓 has an obligation，其余都是往右挂的补充。"),
     ("⑤ 引文放慢", "读到《独立宣言》引语、E pluribus unum 时降速，与前后的口语句子拉开层次。"),
-    ("⑥ 结尾三连降调", "`reclaim its promise` / `a brighter day will come` —— 结尾句用降调收，最后 Thank you 轻收。"),
+    ("⑥ 结尾三连降调", "<b>reclaim its promise</b> / <b>a brighter day will come</b> —— 结尾句用降调收，最后 Thank you 轻收。"),
 ]
 
 QUOTES = [
@@ -128,7 +128,7 @@ QUOTES = [
      "前半句连说两个「不是」，破折号后只给一个「是」。值得整句背下来，"
      "可以套用到任何「不要用标签把人分开」的场合。"),
     ("B", "We are one people, all of us pledging allegiance to the stars and stripes, all of us defending the United States of America.",
-     "排比的收束句。`all of us…, all of us…` 两个并列短语把「one people」落到实处。"
+     "排比的收束句。<b>all of us…, all of us…</b> 两个并列短语把「one people」落到实处。"
      "注意 pledge allegiance to 是固定搭配（向…宣誓效忠），宾语常是 flag / country。"),
     ("C", "Hope in the face of difficulty, hope in the face of uncertainty, the audacity of hope.",
      "三连递进：前两个是「在…之中的希望」，第三个直接换成名词短语 <b>the audacity of hope</b>，"
@@ -137,7 +137,7 @@ QUOTES = [
      "引《创世记》该隐之问的回答，把「我们彼此相连」从政治命题提到伦理层面。"
      "连说两次（brother / sister）扩大覆盖面，念时要慢、要重。"),
     ("E", "Out of this long political darkness a brighter day will come.",
-     "结尾句。`Out of …` 置于句首的介词短语制造悬念，darkness 与 brighter day 形成明暗对偶。"
+     "结尾句。<b>Out of …</b> 置于句首的介词短语制造悬念，darkness 与 brighter day 形成明暗对偶。"
      "适合背下来做「困难之后会好起来」的表达模板。"),
 ]
 

@@ -381,8 +381,18 @@ python3 /home/crf/.claude/skills/english-article-reading/build_mobile.py \
 `read_aloud.css` / `read_aloud.js`。
 
 - **每句一个 🔊**：点句子左侧按钮朗读该句（只读英文，自动剔除 ①②、P# 与拆解框）。
+- **词源表的单词、名言金句也有 🔊**：这两节同样需要能听。
+  - 词源单词：`<b class="w" data-audio="…/wNNN.mp3">`，按钮跟在单词后；
+  - 名言金句：`<span class="t quote" data-audio="…/qNNN.mp3">`，按钮跟在句子后。
+  - `build_article.py` 会自动加上 `class="w"` / `class="t quote"`（后者用来和修辞卡的
+    `.t`（修辞名）区分，否则会把修辞名也当句子读）。给老页面补：
+    ```bash
+    python3 add_read_aloud.py <页面.html>      # 先刷 CSS/JS
+    python3 gen_audio.py <页面.html>            # 再补缺失音频（增量，只合成 w/q）
+    ```
 - **底部控制条**：`▶ 朗读全文`（逐句连读、自动滚动）、`■ 停止`、`0.95×`（点按切语速）。
-- 音频按句存到 `<文件名>.audio/sNNN.mp3`，每句 `<div class="sent" data-audio="…">` 指向它；
+  **只在有 `.sent` 时出现**；没有句子的片段页只挂词/金句的按钮。
+- 音频按句存到 `<文件名>.audio/{s,w,q}NNN.mp3`，元素用 `data-audio` 指向它；
   相对路径，桌面版与手机版通用（用本地服务器打开时一并提供）。
 - **打印 / PDF 时自动隐藏**朗读控件（`@media print`），不影响 A4 排版。
 - 给「已有」的桌面页补/刷新朗读：`python3 add_read_aloud.py <file.html>`，再重跑 `build_mobile.py`。
@@ -394,8 +404,20 @@ python3 /home/crf/.claude/skills/english-article-reading/gen_audio.py \
   "/home/crf/english/speech/<...>.html" --voice en-US-AriaNeural --concurrency 8
 ```
 
+- **默认增量**：已存在的 mp3 会跳过，只合成缺的 —— 给老页面补词/金句音频不必重跑几百句。
+  要全部重做才加 `--force`；只要逐句、跳过词与金句用 `--no-extras`。
+
+> ⚠️ 两个踩过的坑（都属「功能看着正常、其实已经损坏」）：
+> ① **朗读 JS 被插了两份**。`build_article.py` 会把朗读 JS 与模板 JS 放进**同一个
+> `<script>` 块**，而 `add_read_aloud.py` 早期只删「以朗读注释开头的整块」，删不掉
+> 合并块里的那份，每跑一次就再插一份 —— 逐句按钮被加两次（翻倍）。现在用
+> `/* ra-js-start */ … /* ra-js-end */` 标记整块替换，并会把合并块里的遗留尾部截断。
+> 改完请数一下按钮：`document.querySelectorAll('.speech .sent button.say').length` 应等于句数。
+> ② **`read_aloud.js` 开头不能 `if (!sents.length) return;`**：一旦早退，没有逐句内容的
+> 片段页上词源表与金句的按钮就全不挂。只有底部控制条才依赖句子。
+
 可选美音音色：`AriaNeural`（清晰）、`JennyNeural`（友好）、`GuyNeural`（有力，适合演讲）、
-`ChristopherNeural`、`MichelleNeural`、`EricNeural`、`RogerNeural`、`SteffanNeural`；重生成加 `--force`。
+`ChristopherNeural`、`MichelleNeural`、`EricNeural`、`RogerNeural`、`SteffanNeural`。
 
 > 若某页回退到系统语音而嫌机械：iOS 到「设置 → 辅助功能 → 朗读内容 → 声音 → 英语」下载
 > **Premium/Enhanced（Siri）** 语音；但首选还是跑 `gen_audio.py`，让页面直接用神经网络 MP3。

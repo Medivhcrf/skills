@@ -487,8 +487,9 @@ def build(content_path, out_path):
 
     last = g("VOCAB_END") or (VOCAB[-1][0] if VOCAB else "①")
 
+    # 单词加 class="w"：朗读脚本据此给它挂 🔊（词源表也要能听发音）
     vocab_rows = "\n".join(
-        '<tr><td><span class="n">%s</span><b>%s</b> <span class="ipa">%s</span></td>'
+        '<tr><td><span class="n">%s</span><b class="w">%s</b> <span class="ipa">%s</span></td>'
         '<td class="e">%s</td><td>%s</td></tr>' % row for row in VOCAB)
 
     rhet_cards = "\n".join(
@@ -499,8 +500,10 @@ def build(content_path, out_path):
 
     tips_rows = "\n".join('<tr><td><b>%s</b></td><td>%s</td></tr>' % (p, a) for p, a in TIPS)
 
+    # 金句的 .t 加 class="quote"：与修辞卡的 .t（修辞名）区分，朗读脚本只给金句挂 🔊
     quote_cards = "\n".join(
-        '<div class="card">\n  <div class="head"><span class="num">%s</span><span class="t">%s</span></div>\n'
+        '<div class="card">\n  <div class="head"><span class="num">%s</span>'
+        '<span class="t quote">%s</span></div>\n'
         '  <div class="why">%s</div>\n</div>' % q for q in QUOTES)
 
     match_rows = "\n".join('<tr><td>%s</td><td>%s</td></tr>' % r for r in QUIZ_MATCH)
