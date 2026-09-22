@@ -1,5 +1,5 @@
 /* ra-js-start */
-/* ---------- 朗读：优先系统语音（电脑/手机自带），无系统语音时才用预生成音频 ---------- */
+/* ---------- 朗读：优先预生成的神经语音 MP3，缺失/失败才回退系统语音 ---------- */
 (function () {
   var ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
   var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>';
@@ -70,8 +70,11 @@
   function speakSentence(sent, btn, done) {
     mark(btn);
     try { sent.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
-    if (hasSystemVoice()) { speakTTS(sent, done); }
-    else { playAudio(sent, done); }
+    /* 有 data-audio（edge-tts 神经语音）就用它；系统语音只是兜底。
+       Windows 中文系统的 speechSynthesis 只有老式 SAPI5（默认 David 男声），
+       一旦系统语音优先，逐句朗读就全是机械男声。别改回去。 */
+    if (sent.getAttribute("data-audio")) { playAudio(sent, done); }
+    else { speakTTS(sent, done); }
   }
 
   function playAll() {

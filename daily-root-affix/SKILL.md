@@ -200,7 +200,9 @@ python3 $SK/build_mobile_generic.py <页面.html> ...
   表格单元格混有中文时只对英文部分发音。
 - `words-audio/` 为跨页共享目录（按内容 md5 命名），固定在**站点根目录** `/home/crf/english/words-audio/`；页面已归档在 `daily/` 等子目录，脚本会自动算出 `../words-audio/` 前缀（可用 `--site-root` 指定站点根）。
 - 页面 `pronounce.js`：每词一个 🔊，另有左下角「🔤 点词发音」开关（点任意英文词即发音）；
-  优先播放 MP3，缺失回退系统 `speechSynthesis`；打印/PDF 自动隐藏。
+  **优先播放 MP3（神经语音），缺失/失败才回退系统 `speechSynthesis`**；打印/PDF 自动隐藏。
+  ⚠️ 不要改成「系统语音优先」：Windows 中文系统的 `speechSynthesis` 只有老式 SAPI5，
+  默认英文语音是 `Microsoft David`（机械男声），一改回去点发音就全是男声（2026-09 踩过）。
 - 索引 `build_index.py` 会自动识别 `-手机版.html`：手机只显示手机版、电脑显示桌面版 + PDF。
 - 需要联网（edge-tts 在线合成）。首次用：`python3 -m pip install --user --break-system-packages edge-tts`。
 

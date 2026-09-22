@@ -18,6 +18,8 @@ def process(path):
     js = io.open(os.path.join(HERE, "pronounce.js"), encoding="utf-8").read()
     h = re.sub(r'/\* pron-start \*/.*?/\* pron-end \*/', '', h, flags=re.S)
     h = h.replace("</style>", css + "\n</style>", 1)
+    # 历史版本的首行注释有好几种写法（"单词发音"、"单词发音（神经网络…"），
+    # 只按 "/* -+ 单词发音" 匹配才能把旧块整块删掉，否则页面里会同时跑新旧两份。
     h = re.sub(r'<script>\s*/\* -+ 单词发音.*?</script>', '', h, flags=re.S)
     h = h.replace("</body>", "</body>\n<script>\n" + js + "\n</script>", 1)
     io.open(path, "w", encoding="utf-8").write(h)
