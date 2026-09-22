@@ -5,7 +5,7 @@ description: 每天整理10个英语词根词缀及相关单词、词组，附�
 
 # 每日词根词缀 → PDF
 
-用户每天来问一次词根词缀内容。每次整理 10 个（约 7 个词根 + 3 个词缀混合），配相关单词和词组，侧重日常生活常用，附词源信息和演化过程，生成排版精美的 PDF 保存到 `/home/crf/english/`。
+用户每天来问一次词根词缀内容。每次整理 10 个（约 7 个词根 + 3 个词缀混合），配相关单词和词组，侧重日常生活常用，附词源信息和演化过程，生成排版精美的 PDF 保存到 `/home/crf/english/daily/`。
 
 ## 第 1 步：选题（避免重复）
 
@@ -99,14 +99,14 @@ description: 每天整理10个英语词根词缀及相关单词、词组，附�
    - `【日期】` → 当天日期（如 `2026 年 8 月 5 日`）和统计信息（如 `词根 7 个 · 词缀 3 个`）
    - `【卡片内容】` → 替换为生成的 10 张卡片 HTML（词根用 `<div class="card">`，词缀用 `<div class="card affix">`），内部结构参看 template.html 的 CSS 定义
 3. **CSS 样式保持不变**，不增删改任何 CSS 规则。
-4. 写入 `/home/crf/english/<YYYY-MM-DD>-词根词缀.html`。
+4. 写入 `/home/crf/english/daily/<YYYY-MM-DD>-词根词缀.html`。
 5. 用 headless Chrome 转换：
 ```bash
 google-chrome --headless --disable-gpu --no-pdf-header-footer \
-  --print-to-pdf="/home/crf/english/<YYYY-MM-DD>-词根词缀.pdf" \
-  "file:///home/crf/english/<YYYY-MM-DD>-词根词缀.html"
+  --print-to-pdf="/home/crf/english/daily/<YYYY-MM-DD>-词根词缀.pdf" \
+  "file:///home/crf/english/daily/<YYYY-MM-DD>-词根词缀.html"
 ```
-6. **验证**：`pdfinfo "/home/crf/english/<YYYY-MM-DD>-词根词缀.pdf" | grep Pages` 检查页数正常（一般 4 页左右）。
+6. **验证**：`pdfinfo "/home/crf/english/daily/<YYYY-MM-DD>-词根词缀.pdf" | grep Pages` 检查页数正常（一般 4 页左右）。
 7. 保留 HTML 源文件不删除（用户可能修改排版后重新生成）。
 
 ## 第 4 步：汇报 + 更新记忆
@@ -168,7 +168,7 @@ google-chrome --headless --disable-gpu --no-pdf-header-footer \
 
 ## 命名与位置
 
-- 一律保存到 **`/home/crf/english/`**；
+- 一律保存到 **`/home/crf/english/daily/`**；
 - 文件名：`YYYY-MM-DD-词根词缀.html` 和 `YYYY-MM-DD-词根词缀.pdf`。
 
 ## 排版规范（template.html 已内置，勿改动核心样式）
@@ -198,7 +198,7 @@ python3 $SK/build_mobile_generic.py <页面.html> ...
 
 - 发音目标：每个 `<li>` 与 `.usage` 的第一个 `<b>`，以及 `<td class="w">` 里的词；
   表格单元格混有中文时只对英文部分发音。
-- `words-audio/` 为跨页共享目录（按内容 md5 命名），放在站点根目录；页面用相对路径引用。
+- `words-audio/` 为跨页共享目录（按内容 md5 命名），固定在**站点根目录** `/home/crf/english/words-audio/`；页面已归档在 `daily/` 等子目录，脚本会自动算出 `../words-audio/` 前缀（可用 `--site-root` 指定站点根）。
 - 页面 `pronounce.js`：每词一个 🔊，另有左下角「🔤 点词发音」开关（点任意英文词即发音）；
   优先播放 MP3，缺失回退系统 `speechSynthesis`；打印/PDF 自动隐藏。
 - 索引 `build_index.py` 会自动识别 `-手机版.html`：手机只显示手机版、电脑显示桌面版 + PDF。

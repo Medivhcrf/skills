@@ -32,7 +32,9 @@ def build():
         elif a == "--max-days" and args:
             max_days = int(args.pop(0))
 
-    daily_files = sorted(ENGLISH_DIR.glob("*-词根词缀.html"))
+    # 每日词根词缀页已归档到 daily/ 子目录；根目录兜底以便兼容旧文件
+    daily_files = sorted(ENGLISH_DIR.glob("daily/*-词根词缀.html"))
+    daily_files += sorted(ENGLISH_DIR.glob("*-词根词缀.html"))
     daily_files = [f for f in daily_files if "复习" not in f.name]
     days = []
     for f in daily_files:

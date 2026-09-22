@@ -6,7 +6,7 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 # 英语文章全文精读 → HTML / PDF / 手机版
 
 把一篇英语文章（演讲、散文、社论、课文等）做成结构化的「全文精读」页。
-标准范例见 `/home/crf/english/2026-08-27-I-Have-a-Dream.html`（桌面）、
+标准范例见 `/home/crf/english/speech/2026-08-27-I-Have-a-Dream.html`（桌面）、
 `...-手机版.html`（手机）与 `...pdf`（A4），本技能就是从它抽象出来的。
 
 **工具文件**：`template.html`（桌面模板）、`build_article.py`（数据 → HTML 生成器）、
@@ -21,9 +21,9 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 
 | 文件 | 说明 |
 | --- | --- |
-| `/home/crf/english/<YYYY-MM-DD>-<Title>.html` | 桌面 / A4 版（用于打印 PDF） |
-| `/home/crf/english/<YYYY-MM-DD>-<Title>.pdf` | A4 PDF |
-| `/home/crf/english/<YYYY-MM-DD>-<Title>-手机版.html` | 手机版（由脚本生成） |
+| `/home/crf/english/speech/<YYYY-MM-DD>-<Title>.html` | 桌面 / A4 版（用于打印 PDF） |
+| `/home/crf/english/speech/<YYYY-MM-DD>-<Title>.pdf` | A4 PDF |
+| `/home/crf/english/speech/<YYYY-MM-DD>-<Title>-手机版.html` | 手机版（由脚本生成） |
 
 - `<Title>` 用英文标题、连字符连接，如 `I-Have-a-Dream`。
 - 日期取当天；HTML 源文件一律保留，方便改排版后重新生成。
@@ -232,7 +232,7 @@ FOOTER     = "页脚文字"     # 可选
 
 ```bash
 python3 /home/crf/.claude/skills/english-article-reading/build_article.py \
-  <内容模块.py> "/home/crf/english/<YYYY-MM-DD>-<Title>.html"
+  <内容模块.py> "/home/crf/english/speech/<YYYY-MM-DD>-<Title>.html"
 ```
 
 生成后同样走下面的 PDF 与手机版步骤。批量时可对每篇文章各写一个内容模块，循环调用。
@@ -242,12 +242,12 @@ python3 /home/crf/.claude/skills/english-article-reading/build_article.py \
 1. 产出桌面 HTML，二选一：
    - **短篇**：读取 `template.html`，替换所有 `【】` 占位符，**CSS 保持不变**；
    - **长文 / 批量**：写内容模块，用 `build_article.py` 生成（见上一节）。
-2. 写入 `/home/crf/english/<YYYY-MM-DD>-<Title>.html`。
+2. 写入 `/home/crf/english/speech/<YYYY-MM-DD>-<Title>.html`。
 3. （推荐）生成神经网络朗读音频（需联网；详见「朗读」一节）。**必须在生成手机版之前**，手机版才会带上音频：
 
 ```bash
 python3 /home/crf/.claude/skills/english-article-reading/gen_audio.py \
-  "/home/crf/english/<YYYY-MM-DD>-<Title>.html" --voice en-US-AriaNeural
+  "/home/crf/english/speech/<YYYY-MM-DD>-<Title>.html" --voice en-US-AriaNeural
 ```
 
 4. 转 PDF（**必须带 `--no-pdf-header-footer`**）：
@@ -255,15 +255,15 @@ python3 /home/crf/.claude/skills/english-article-reading/gen_audio.py \
 ```bash
 google-chrome --headless --disable-gpu --no-sandbox \
   --no-pdf-header-footer \
-  --print-to-pdf="/home/crf/english/<YYYY-MM-DD>-<Title>.pdf" \
-  "file:///home/crf/english/<YYYY-MM-DD>-<Title>.html"
+  --print-to-pdf="/home/crf/english/speech/<YYYY-MM-DD>-<Title>.pdf" \
+  "file:///home/crf/english/speech/<YYYY-MM-DD>-<Title>.html"
 ```
 
 5. 生成手机版（自动加 viewport、移动端排版、表格转卡片、点按查词、返回顶部；**在 gen_audio 之后**才会带上音频）：
 
 ```bash
 python3 /home/crf/.claude/skills/english-article-reading/build_mobile.py \
-  "/home/crf/english/<YYYY-MM-DD>-<Title>.html"
+  "/home/crf/english/speech/<YYYY-MM-DD>-<Title>.html"
 ```
 
 6. （可选）更新索引：`python3 /home/crf/english/build_index.py`。
@@ -303,7 +303,7 @@ python3 /home/crf/.claude/skills/english-article-reading/build_mobile.py \
 
 ```bash
 python3 /home/crf/.claude/skills/english-article-reading/gen_audio.py \
-  "/home/crf/english/<...>.html" --voice en-US-AriaNeural --concurrency 8
+  "/home/crf/english/speech/<...>.html" --voice en-US-AriaNeural --concurrency 8
 ```
 
 可选美音音色：`AriaNeural`（清晰）、`JennyNeural`（友好）、`GuyNeural`（有力，适合演讲）、

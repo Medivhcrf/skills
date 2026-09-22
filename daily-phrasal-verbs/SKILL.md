@@ -5,7 +5,7 @@ description: 每日辨析英语动词词组（phrasal verbs），如 take off / 
 
 # 每日动词词组辨析 → PDF
 
-用户想要专门区分英语动词词组（phrasal verbs）。每次选一个核心动词（如 take、get、turn、look、come、put），围绕它整理 8-10 个最常见的动词词组，配含义、语法要点、易混辨析和生活例句，生成排版精美的 PDF 保存到 `/home/crf/english/`。
+用户想要专门区分英语动词词组（phrasal verbs）。每次选一个核心动词（如 take、get、turn、look、come、put），围绕它整理 8-10 个最常见的动词词组，配含义、语法要点、易混辨析和生活例句，生成排版精美的 PDF 保存到 `/home/crf/english/phrasal/`。
 
 ## 第 1 步：选题（避免重复）
 
@@ -58,14 +58,14 @@ description: 每日辨析英语动词词组（phrasal verbs），如 take off / 
    - `【小词表】` → 小词含义速查表
    - `【词组内容】` → 替换为生成的词组卡片 HTML
 3. **CSS 样式保持不变**，不增删改任何 CSS 规则。
-4. 写入 `/home/crf/english/<YYYY-MM-DD>-动词词组.html`。
+4. 写入 `/home/crf/english/phrasal/<YYYY-MM-DD>-动词词组.html`。
 5. 用 headless Chrome 转换：
 ```bash
 google-chrome --headless --disable-gpu --no-pdf-header-footer \
-  --print-to-pdf="/home/crf/english/<YYYY-MM-DD>-动词词组.pdf" \
-  "file:///home/crf/english/<YYYY-MM-DD>-动词词组.html"
+  --print-to-pdf="/home/crf/english/phrasal/<YYYY-MM-DD>-动词词组.pdf" \
+  "file:///home/crf/english/phrasal/<YYYY-MM-DD>-动词词组.html"
 ```
-6. **验证**：`pdfinfo "/home/crf/english/<YYYY-MM-DD>-动词词组.pdf" | grep Pages` 检查页数正常（一般 4 页左右）。
+6. **验证**：`pdfinfo "/home/crf/english/phrasal/<YYYY-MM-DD>-动词词组.pdf" | grep Pages` 检查页数正常（一般 4 页左右）。
 7. 保留 HTML 源文件不删除（用户可能修改排版后重新生成）。
 
 ## 第 4 步：汇报 + 更新记忆
@@ -89,7 +89,7 @@ google-chrome --headless --disable-gpu --no-pdf-header-footer \
 
 ## 命名与位置
 
-- 一律保存到 **`/home/crf/english/`**；
+- 一律保存到 **`/home/crf/english/phrasal/`**；
 - 文件名：`YYYY-MM-DD-动词词组.html` 和 `YYYY-MM-DD-动词词组.pdf`。
 
 ## 排版规范（template.html 已内置，勿改动核心样式）

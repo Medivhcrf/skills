@@ -1,17 +1,17 @@
 ---
 name: root-affix-review
-description: 复习历史每日词根词缀内容——自动扫描 /home/crf/english/ 下所有历史 HTML（每日词根词缀），解析已学过的词根词缀、单词、词组、例句，生成复习 PDF（知识清单 + 填词练习 + 例句挖空 + 配对练习 + 答案区）。触发场景：用户说"复习词根词缀""回顾一下""复习""来个复习""复习昨天的内容"等。
+description: 复习历史每日词根词缀内容——自动扫描 /home/crf/english/daily/ 下所有历史 HTML（每日词根词缀），解析已学过的词根词缀、单词、词组、例句，生成复习 PDF（知识清单 + 填词练习 + 例句挖空 + 配对练习 + 答案区）。触发场景：用户说"复习词根词缀""回顾一下""复习""来个复习""复习昨天的内容"等。
 metadata:
   node_type: skill
 ---
 
 # 词根词缀复习 → PDF
 
-复习用户历史积累的词根词缀内容。自动检测 `/home/crf/english/` 下的所有历史 HTML 源文件，解析已学卡片，生成一份复习 PDF 保存到 `/home/crf/english/`。
+复习用户历史积累的词根词缀内容。自动检测 `/home/crf/english/daily/` 下的所有历史 HTML 源文件，解析已学卡片，生成一份复习 PDF 保存到 `/home/crf/english/review/`。
 
 ## 第 1 步：自动检测历史内容
 
-1. 扫描 `/home/crf/english/` 下所有 `*-词根词缀.html` 文件（排除文件名含「复习」的）。
+1. 扫描 `/home/crf/english/daily/` 下所有 `*-词根词缀.html` 文件（排除文件名含「复习」的）。
 2. 用本目录下 `build_review_table.py`（方案A·三栏回忆表）自动解析每张卡片并生成复习 HTML：
    ```bash
    python3 /home/crf/.claude/skills/root-affix-review/build_review_table.py
@@ -20,7 +20,7 @@ metadata:
    - 可选参数：
      - `--max-days N`：只复习最近 N 天（默认全部历史）
      - `--out 文件名`：自定义输出文件名
-3. 脚本输出文件名：`YYYY-MM-DD-词根词缀复习.html`，写入 `/home/crf/english/`。
+3. 脚本输出文件名：`YYYY-MM-DD-词根词缀复习.html`，写入 `/home/crf/english/review/`。
 
 ## 第 2 步：确认输出并微调（可选）
 
@@ -34,10 +34,10 @@ metadata:
 2. 用 headless Chrome 转换：
 ```bash
 google-chrome --headless --disable-gpu --no-pdf-header-footer \
-  --print-to-pdf="/home/crf/english/<YYYY-MM-DD>-词根词缀复习.pdf" \
-  "file:///home/crf/english/<YYYY-MM-DD>-词根词缀复习.html"
+  --print-to-pdf="/home/crf/english/review/<YYYY-MM-DD>-词根词缀复习.pdf" \
+  "file:///home/crf/english/review/<YYYY-MM-DD>-词根词缀复习.html"
 ```
-3. **验证**：`pdfinfo "/home/crf/english/<YYYY-MM-DD>-词根词缀复习.pdf" | grep Pages`。约 1 页可容纳 1–2 天（10–20 行）；覆盖全部历史时一般 6–10 页。
+3. **验证**：`pdfinfo "/home/crf/english/review/<YYYY-MM-DD>-词根词缀复习.pdf" | grep Pages`。约 1 页可容纳 1–2 天（10–20 行）；覆盖全部历史时一般 6–10 页。
 
 ## 第 4 步：汇报 + 更新记忆
 
