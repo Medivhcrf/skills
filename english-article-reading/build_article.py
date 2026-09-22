@@ -413,7 +413,7 @@ def render_sentence(pnum, punct, chunks):
                    '<span class="sg" style="color:%s">%s</span>'
                    '%s<span class="tg">%s</span>'
                    '<span class="note">%s</span></div>'
-                   % (m["depth"], branch, m["bg"], m["num"], m["cat"],
+                   % (m["depth"], branch, m["fg"], m["num"], m["cat"],
                       m["emoji"], m["rel"], m["fg"], m["html"], mod_html, m["tag"], m["note"]))
     head = '<span class="pnum">P%d</span>' % pnum if pnum else ''
     return ('<div class="sent">%s%s%s\n<div class="brk">%s</div></div>'

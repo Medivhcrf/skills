@@ -140,7 +140,7 @@ MOBILE_CSS = r"""
     border-radius:5px; margin-right:6px; padding:0 3px;
     font-family:'DejaVu Sans',sans-serif; vertical-align:1px;
   }
-  .speech .brk .sg{ font-size:.9rem; line-height:1.6;
+  .speech .brk .sg{ font-size:.9rem; line-height:1.6; margin-right:.4em;
     font-family:'DejaVu Sans','Noto Sans CJK SC',sans-serif; }
   .speech .brk .mod{ color:#1e293b; font-weight:bold; font-size:.82rem; }
   .speech .brk .mod::after{ content:"·"; color:#cbd5e1; font-weight:normal; margin-left:4px; }

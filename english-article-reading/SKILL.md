@@ -306,6 +306,11 @@ python3 /home/crf/.claude/skills/english-article-reading/build_mobile.py \
 
 ### 验证
 
+- **结构**（最容易漏、后果最重）：每个 `.para` 里 `<div class="sent">` 数必须等于 `<div class="brk">` 数；
+  `.brk` 必须在 `.sent` **内部**。用文字处理脚本改写页面后**务必跑一次**——
+  一旦句末标点被写成 `</div>`，句子结构会断、拆解框掉到 `.para` 外面，
+  而「色块数 / 行数」这类计数检查**照样通过**，看不出问题。
+- **对齐**：每句 `.ck` 数 == 该句 `.ly` 数。
 - `pdfinfo "<pdf>" | grep Pages` —— 页数正常（一般 4–12 页）。
 - `pdftotext "<pdf>" - | head -40` —— 中文不乱码、章节标题齐全。
 - 手机版：抽查 390px 宽无横向溢出（可用 headless Chrome 截图，或确认 `scrollWidth == innerWidth`）。

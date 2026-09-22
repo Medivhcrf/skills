@@ -64,10 +64,15 @@ def parse_sentence(block):
     audio = re.search(r'data-audio="([^"]*)"', attrs)
     pnum = re.search(r'<span class="pnum">P(\d+)</span>', block)
     cks = re.findall(r'<span class="ck"[^>]*>(.*?)</span>', block, re.S)
-    # 句末标点：最后一个色块之后、拆解框之前
-    tail = block.split("</span>")[-1]
-    punct = tail.split('<div class="brk">')[0]
-    punct = re.sub(r"\s+", "", punct) or "."
+    # 句末标点：最后一个色块闭合 与 <div class="brk"> 之间。
+    # 注意必须先在 brk 处切开——否则 rfind("</span>") 会命中拆解框里最后一个
+    # .note 的闭合标签，把 </div></div> 当成标点写进正文（曾因此弄坏页面结构）。
+    sent_part = block.split('<div class="brk">')[0]
+    cut = sent_part.rfind("</span>")
+    punct = sent_part[cut + len("</span>"):] if cut >= 0 else ""
+    punct = re.sub(r"\s+", "", punct)
+    if not punct or "<" in punct:      # 兜底：解析异常时退回句号，绝不写入标签
+        punct = "."
     rows = []
     for r in re.findall(r'<div class="ly[^"]*">(.*?)</div>', block, re.S):
         tg = re.search(r'<span class="tg">(.*?)</span>', r, re.S)
