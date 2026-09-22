@@ -12,6 +12,19 @@
 <style>
   @page { size: A4; margin: 15mm 14mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  :root {
+    /* 角色色点：一套低饱和、可打印的语义色（不依赖 emoji 字体） */
+    --r-skeleton: #475569;  /* 骨架 / 主语 —— 中性石板灰 */
+    --r-pred:     #0d7d74;  /* 谓语 / 动作 —— 深青 */
+    --r-obj:      #b45309;  /* 宾语 / 施事 —— 暖褐 */
+    --r-attr:     #7c3aed;  /* 定语 / 同位语 —— 紫 */
+    --r-adv:      #2563eb;  /* 非谓语状语 —— 蓝 */
+    --r-clause:   #0891b2;  /* 限定从句 —— 青蓝 */
+    --r-coord:    #65a30d;  /* 并列 —— 橄榄绿 */
+    --r-contrast: #be123c;  /* 转折 / 过渡 —— 玫红 */
+    --brk-line:   #cbd5e1;
+    --brk-bg:     #fafbfc;
+  }
   body {
     font-family: 'Noto Sans CJK SC', 'Droid Sans Fallback', 'WenQuanYi Zen Hei', sans-serif;
     font-size: 9.8pt;
@@ -58,18 +71,32 @@
   .speech p { margin: 6px 0; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', sans-serif; }
   .speech .sline { margin: 4px 0; }
   .speech .brk {
-    margin: 3px 0 6px 0; padding: 3px 8px 4px 8px;
-    border-left: 3px solid #93c5fd; background: #f8fafc;
-    border-radius: 0 4px 4px 0; font-size: 8.4pt; color: #334155;
+    margin: 3px 0 6px 0; padding: 4px 10px 5px 10px;
+    border-left: 2px solid var(--brk-line); background: var(--brk-bg);
+    border-radius: 0 5px 5px 0; font-size: 8.4pt; color: #334155;
   }
-  .speech .brk .bhead { font-weight: bold; color: #1d4ed8; font-size: 8.2pt; margin-bottom: 2px; }
-  .speech .brk .ly { line-height: 1.55; }
+  .speech .brk .bhead { font-weight: bold; color: #475569; font-size: 8.2pt; margin-bottom: 2px; }
+  .speech .brk .ly { line-height: 1.55; position: relative; }
   .speech .brk .n { color: #94a3b8; font-weight: bold; font-family: 'DejaVu Sans', monospace; margin-right: 3px; }
+  /* 角色色点：CSS 画的小圆点，跨平台一致、可打印、可精确调色 */
+  .speech .brk .role {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    margin: 0 5px 0 1px; vertical-align: 1px; background: var(--r-skeleton);
+  }
+  .speech .brk .role[data-cat="skeleton"] { background: var(--r-skeleton); }
+  .speech .brk .role[data-cat="pred"]     { background: var(--r-pred); }
+  .speech .brk .role[data-cat="obj"]      { background: var(--r-obj); }
+  .speech .brk .role[data-cat="attr"]     { background: var(--r-attr); }
+  .speech .brk .role[data-cat="adv"]      { background: var(--r-adv); }
+  .speech .brk .role[data-cat="clause"]   { background: var(--r-clause); }
+  .speech .brk .role[data-cat="coord"]    { background: var(--r-coord); }
+  .speech .brk .role[data-cat="contrast"] { background: var(--r-contrast); }
   /* 语法术语：退为灰色小字，只做参考 */
   .speech .brk .tg { color: #94a3b8; font-size: 7.4pt; margin-right: 5px; }
-  /* 修饰关系：主视觉 */
-  .speech .brk .mod { color: #1e293b; font-weight: bold; margin-right: 5px; }
-  .speech .brk .mod::after { content: "·"; color: #cbd5e1; font-weight: normal; margin-left: 5px; }
+  /* 修饰关系：主视觉。**保持内联**——实测让它换行会把 PDF 从 20 页撑到 32 页，
+     所以层级靠「色点 + 深色粗体 vs 灰色小字」的对比来做，不靠换行 */
+  .speech .brk .mod { color: #1e293b; font-weight: bold; margin-right: 4px; }
+  .speech .brk .mod::after { content: "·"; color: #cbd5e1; font-weight: normal; margin-left: 4px; }
   .speech .brk .sg { color: #111827; font-family: 'DejaVu Sans', sans-serif; margin-right: 5px; }
   .speech .brk .note { color: #64748b; }
   .speech .brk .sg u { text-decoration-color: #f87171; }
@@ -79,10 +106,9 @@
   .speech .brk .ly.d3 { padding-left: 60px; }
   .speech .brk .ly.d4 { padding-left: 80px; }
   .speech .brk .tbranch {
-    color: #cbd5e1; font-family: 'DejaVu Sans', sans-serif;
+    color: #b8c4d0; font-family: 'DejaVu Sans', sans-serif;
     white-space: pre; margin-right: 1px;
   }
-  .speech .brk .role { margin-right: 4px; font-size: 8pt; }
 
   .speech .para { margin: 8px 0; }
   .speech .sent { margin: 3px 0; }
@@ -112,11 +138,18 @@
   .refrain.ring { background: #ddd6fe; color: #4c1d95; }
   .refrain.free { background: #fecaca; color: #7f1d1d; }
   .legend {
-    display: flex; flex-wrap: wrap; gap: 4px 10px;
-    background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px;
-    padding: 5px 9px; margin-bottom: 7px; font-size: 8.5pt; color: #7c2d12;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
+    padding: 6px 10px; margin-bottom: 8px; font-size: 8.5pt; color: #475569;
+    line-height: 1.75;
   }
-  .legend .item { padding: 1px 7px; border-radius: 3px; font-weight: bold; }
+  .legend .item { font-weight: bold; color: #334155; margin-right: 2px; }
+  .legend .lg { display: inline-flex; align-items: center; white-space: nowrap; }
+  .legend .lg i {
+    width: 7px; height: 7px; border-radius: 50%;
+    display: inline-block; margin-right: 4px;
+  }
+  .legend b { color: #1e293b; }
 
   .speech .kw { cursor: help; }
   #tips {
@@ -257,16 +290,19 @@
 
 <h2 class="section">二、全文精读（重点词已标注①，见词汇表）</h2>
 
-<div class="legend"><span class="item" style="background:#dbeafe;color:#1e3a8a">🧱 色块拆解</span>正文按句子成分分色上色；每句下方拆解框里，<b>色块编号 ↔ 拆解行 ↔ 汉语解释</b>一一对应。</div>
+<div class="legend"><span class="item">🧱 分层拆解</span>句下拆解框里 <b>编号 ↔ 色块 ↔ 汉语解释</b> 一一对应；<b>缩进 = 挂接层级</b>。每行深色粗体那部分是<b>这块在给谁补充什么</b>，前面色点是它与上级的关系：<span class="lg"><i style="background:#475569"></i>骨架 / 主语</span><span class="lg"><i style="background:#0d7d74"></i>谓语 / 动作</span><span class="lg"><i style="background:#b45309"></i>宾语 / 施事</span><span class="lg"><i style="background:#7c3aed"></i>定语 / 同位语</span><span class="lg"><i style="background:#2563eb"></i>非谓语状语</span><span class="lg"><i style="background:#0891b2"></i>限定从句</span><span class="lg"><i style="background:#65a30d"></i>并列</span><span class="lg"><i style="background:#be123c"></i>转折 / 过渡</span>。</div>
 
 <div class="speech">
 
-  <!-- 每段一个 .para；每句一个 .sent；句内成分用 .ck 色块；句后紧跟 .brk 拆解框 -->
+  <!-- 每段一个 .para；每句一个 .sent；句内成分用 .ck 色块；句后紧跟 .brk 拆解框。
+       拆解行格式：.ly.dN（N = 挂接层级）内含
+         .tbranch 树形连线 + .chip 编号 + .role 色点 + .mod 在给谁补充什么
+         + .tg 语法术语（灰色小字）+ .sg 原文 + .note 解释 -->
   <div class="para">
-    <div class="sent"><span class="pnum">P1</span><span class="ck" style="background:#dbeafe;color:#1e3a8a">成分一</span> <span class="ck" style="background:#bbf7d0;color:#14532d">成分二</span> <span class="ck" style="background:#fde68a;color:#78350f">成分三<span class="sup">①</span></span>.
-    <div class="brk"><div class="ly"><span class="chip" style="background:#dbeafe">1</span><span class="tg">骨架</span><span class="sg" style="color:#1e3a8a">成分一</span><span class="note">汉语解释：这块在句中起什么作用</span></div>
-<div class="ly"><span class="chip" style="background:#bbf7d0">2</span><span class="tg">做什么</span><span class="sg" style="color:#14532d">成分二</span><span class="note">汉语解释</span></div>
-<div class="ly"><span class="chip" style="background:#fde68a">3</span><span class="tg">时间</span><span class="sg" style="color:#78350f">成分三①</span><span class="note">汉语解释</span></div></div></div>
+    <div class="sent"><span class="pnum">P1</span><span class="ck" style="background:#e8effb;color:#1e3a8a">成分一</span> <span class="ck" style="background:#e6f4ea;color:#14532d">成分二</span> <span class="ck" style="background:#fdf3d8;color:#7c4a03">成分三<span class="sup">①</span></span>.
+    <div class="brk"><div class="ly d0"><span class="chip" style="background:#e8effb">1</span><span class="role" data-cat="skeleton" title="🔵 骨架"></span><span class="mod">全句的主干</span><span class="tg">主干</span><span class="sg" style="color:#1e3a8a">成分一</span><span class="note">汉语解释：这块在句中起什么作用</span></div>
+<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#e6f4ea">2</span><span class="role" data-cat="pred" title="🟢 谓语"></span><span class="mod">说明主语做了什么</span><span class="tg">谓语</span><span class="sg" style="color:#14532d">成分二</span><span class="note">汉语解释</span></div>
+<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#fdf3d8">3</span><span class="role" data-cat="adv" title="🟣 时间"></span><span class="mod">补充：这件事发生在什么时候</span><span class="tg">时间状语</span><span class="sg" style="color:#7c4a03">成分三①</span><span class="note">汉语解释</span></div></div></div>
   </div>
 
   <!-- 重复上面的 .para 结构，直到全文结束。段落之间无需额外分隔。 -->

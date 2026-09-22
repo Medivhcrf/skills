@@ -34,6 +34,10 @@ MOBILE_CSS = r"""
   :root{
     --bg:#f3f4f8; --card:#ffffff; --ink:#1f2937; --line:#e5e7eb;
     --red:#b91c1c; --red-d:#7f1d1d; --blue:#1e3a8a;
+    /* 角色色点：与桌面版同一套语义色 */
+    --r-skeleton:#475569; --r-pred:#0d7d74; --r-obj:#b45309; --r-attr:#7c3aed;
+    --r-adv:#2563eb; --r-clause:#0891b2; --r-coord:#65a30d; --r-contrast:#be123c;
+    --brk-line:#cbd5e1; --brk-bg:#fafbfc;
     --pad:14px;
   }
   *{ box-sizing:border-box; margin:0; padding:0;
@@ -103,7 +107,7 @@ MOBILE_CSS = r"""
   /* structure breakdown box */
   .speech .brk{
     margin:8px 0 4px; padding:8px 10px 4px;
-    border-left:3px solid #93c5fd; background:#f8fafc;
+    border-left:2px solid var(--brk-line); background:var(--brk-bg);
     border-radius:0 10px 10px 0; font-size:.82rem;
   }
   .speech .brk .bhead{
@@ -115,20 +119,32 @@ MOBILE_CSS = r"""
   .speech .brk .ly.d2{ padding-left:28px; }
   .speech .brk .ly.d3{ padding-left:42px; }
   .speech .brk .ly.d4{ padding-left:56px; }
-  .speech .brk .tbranch{ color:#cbd5e1; white-space:pre; margin-right:1px; }
-  .speech .brk .role{ margin-right:5px; font-size:.76rem; }
+  .speech .brk .tbranch{ color:#b8c4d0; white-space:pre; margin-right:1px; }
+  /* 角色色点：CSS 画的小圆点，与桌面版一致 */
+  .speech .brk .role{
+    display:inline-block; width:8px; height:8px; border-radius:50%;
+    margin:0 6px 0 1px; vertical-align:1px; background:var(--r-skeleton);
+  }
+  .speech .brk .role[data-cat="skeleton"]{ background:var(--r-skeleton); }
+  .speech .brk .role[data-cat="pred"]{ background:var(--r-pred); }
+  .speech .brk .role[data-cat="obj"]{ background:var(--r-obj); }
+  .speech .brk .role[data-cat="attr"]{ background:var(--r-attr); }
+  .speech .brk .role[data-cat="adv"]{ background:var(--r-adv); }
+  .speech .brk .role[data-cat="clause"]{ background:var(--r-clause); }
+  .speech .brk .role[data-cat="coord"]{ background:var(--r-coord); }
+  .speech .brk .role[data-cat="contrast"]{ background:var(--r-contrast); }
   .speech .brk .chip{
     display:inline-block; min-width:17px; height:17px; line-height:17px;
     text-align:center; color:#fff; font-size:.68rem; font-weight:bold;
     border-radius:5px; margin-right:6px; padding:0 3px;
     font-family:'DejaVu Sans',sans-serif; vertical-align:1px;
   }
-  .speech .brk .mod{ display:block; margin:5px 0 0; color:#1e293b; font-weight:bold;
-    font-size:.82rem; line-height:1.55; }
-  .speech .brk .tg{ display:inline-block; margin-top:4px; color:#94a3b8; font-size:.68rem;
-    font-weight:normal; }
-  .speech .brk .sg{ display:block; margin:4px 0 0; font-size:.9rem; line-height:1.6;
+  .speech .brk .sg{ font-size:.9rem; line-height:1.6;
     font-family:'DejaVu Sans','Noto Sans CJK SC',sans-serif; }
+  .speech .brk .mod{ color:#1e293b; font-weight:bold; font-size:.82rem; }
+  .speech .brk .mod::after{ content:"·"; color:#cbd5e1; font-weight:normal; margin-left:4px; }
+  .speech .brk .tg{ display:block; margin-top:3px; color:#94a3b8; font-size:.68rem;
+    font-weight:normal; }
   .speech .brk .note{ display:block; margin-top:3px; color:#64748b; font-size:.8rem; line-height:1.6; }
   .speech .brk .sg u{ text-decoration-color:#f87171; }
 
@@ -143,11 +159,14 @@ MOBILE_CSS = r"""
   .refrain.free{ background:#fecaca; color:#7f1d1d; }
 
   .legend{
-    display:flex; flex-wrap:wrap; gap:6px 10px; background:#fff7ed;
-    border:1px solid #fed7aa; border-radius:12px; padding:10px 12px;
-    margin-bottom:10px; font-size:.82rem; color:#7c2d12;
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; background:#f8fafc;
+    border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px;
+    margin-bottom:10px; font-size:.82rem; color:#475569; line-height:1.7;
   }
-  .legend .item{ padding:1px 8px; border-radius:4px; font-weight:bold; }
+  .legend .item{ font-weight:bold; color:#334155; }
+  .legend .lg{ display:inline-flex; align-items:center; white-space:nowrap; }
+  .legend .lg i{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
+  .legend b{ color:#1e293b; }
 
   /* ---------- tables ---------- */
   table{ width:100%; border-collapse:collapse; font-size:.86rem; margin:8px 0 14px; }

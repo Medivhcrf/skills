@@ -29,8 +29,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TPL = os.path.join(HERE, "template.html")
 
 PALETTE = [
-    ("#dbeafe", "#1e3a8a"), ("#bbf7d0", "#14532d"), ("#fde68a", "#78350f"),
-    ("#fbcfe8", "#831843"), ("#ddd6fe", "#4c1d95"), ("#fed7aa", "#7c2d12"),
+    ("#e8effb", "#1e3a8a"),   # 蓝
+    ("#e6f4ea", "#14532d"),   # 绿
+    ("#fdf3d8", "#7c4a03"),   # 琥珀
+    ("#fbe9f2", "#9d174d"),   # 玫红
+    ("#eee9fb", "#5b21b6"),   # 紫
+    ("#e9f5f1", "#0f5f5c"),   # 青
 ]
 CIRC = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚"
 
@@ -65,6 +69,73 @@ REL_KEYS = sorted(REL_EMOJI.items(), key=lambda kv: (-len(kv[0]), kv[0]))
 # 复合标签的分隔符：「定语/施事」只取「定语」
 REL_SEP = re.compile(r"[/／|｜、,，;；]")
 TREE = ("├─", "└─", "│", "　")  # ├─ └─ │ 全角空格
+
+# 角色类别 → (中文名, 色值)。**唯一色源**：色点、图例都由它生成，
+# 避免图例里硬编码的色值和实际渲染脱节。
+ROLE_TABLE = [
+    ("skeleton", "骨架 / 主语", "#475569"),
+    ("pred",     "谓语 / 动作", "#0d7d74"),
+    ("obj",      "宾语 / 施事", "#b45309"),
+    ("attr",     "定语 / 同位语", "#7c3aed"),
+    ("adv",      "非谓语状语", "#2563eb"),
+    ("clause",   "限定从句", "#0891b2"),
+    ("coord",    "并列", "#65a30d"),
+    ("contrast", "转折 / 过渡", "#be123c"),
+]
+ROLE_NAME = dict((k, n) for k, n, _ in ROLE_TABLE)
+ROLE_COLOR = dict((k, c) for k, _, c in ROLE_TABLE)
+
+
+def role_legend():
+    """图例 HTML：用色点 + 中文名，顺序与 ROLE_TABLE 一致。"""
+    items = "".join(
+        '<span class="lg"><i style="background:%s"></i>%s</span>' % (c, n)
+        for _, n, c in ROLE_TABLE)
+    return ('<div class="legend"><span class="item">🧱 分层拆解</span>'
+            '句下拆解框里 <b>编号 ↔ 色块 ↔ 汉语解释</b> 一一对应；'
+            '<b>缩进 = 挂接层级</b>（往右缩进的成分挂在上一行下面）。'
+            '每行深色粗体那部分是<b>这块在给谁补充什么</b>，'
+            '前面色点是它与上级的关系：%s。'
+            '读法：先把最左边不缩进的骨架立起来，其余全是在它上面加细节。</div>' % items)
+
+# 角色 → 色点类别。**颜色不用 emoji 实现**：emoji 在缺字体的环境里会退化成
+# 单色方块（整个标记列变成一片灰），也不受 CSS 控制、无法精确调色与打印。
+# 这里把 emoji 当「角色键」，实际渲染成 CSS 画的色点，跨平台一致。
+CAT_BY_EMOJI = {
+    "🔵": "skeleton", "🟢": "pred", "🟠": "obj", "🟡": "attr",
+    "🟣": "adv", "🩵": "clause", "🟤": "coord", "🔴": "contrast",
+}
+ROLE_EMOJI_SET = frozenset(CAT_BY_EMOJI)
+CAT_BY_REL = {
+    "骨架": "skeleton", "主语": "skeleton", "主句": "skeleton", "主谓": "skeleton",
+    "分句": "skeleton", "分句一": "skeleton", "分句二": "skeleton", "分句三": "skeleton",
+    "倒装": "skeleton", "形式主语": "skeleton", "短句": "skeleton",
+    "谓语": "pred", "动作": "pred", "做什么": "pred", "系表": "pred",
+    "祈使": "pred", "被动": "pred",
+    "宾语": "obj", "表语": "obj", "双宾": "obj", "补语": "obj", "宾补": "obj",
+    "引语": "obj", "对象": "obj", "施事": "obj", "受事": "obj", "与事": "obj",
+    "定语": "attr", "同位": "attr", "同位语": "attr", "修饰": "attr", "补充": "attr",
+    "并列": "coord",
+    "转折": "contrast", "让步": "contrast", "对比": "contrast", "收束": "contrast",
+    "过渡": "contrast", "结果": "contrast", "判断": "contrast", "结论": "contrast",
+}
+
+
+def role_cat(emoji, rel, tag):
+    """决定色点颜色类别：优先看 emoji（角色键），再退回关系名 / 语法标签。"""
+    if emoji in CAT_BY_EMOJI:
+        return CAT_BY_EMOJI[emoji]
+    for cand in (rel, tag):
+        if not cand:
+            continue
+        c = REL_SEP.split(cand)[0].strip()
+        if c in CAT_BY_REL:
+            return CAT_BY_REL[c]
+        for key, cat in CAT_BY_REL.items():
+            if key in c:
+                return cat
+    return "adv"
+
 warnings = []  # 内容模块的写法告警（如把语法术语写进了 mod）
 
 
@@ -156,6 +227,18 @@ def infer_mod(rel, tag, depth, emoji, author_mod):
     return "%s：%s" % (act, who)
 
 
+def strip_role_emoji(s):
+    """去掉语法标签/关系名尾部的角色 emoji。
+
+    颜色已由 CSS 色点负责，标签里再带 emoji 是冗余（且缺字体的环境会变方块）。
+    只清角色 emoji，不动标签正文。
+    """
+    if not s:
+        return s
+    s = "".join(ch for ch in s if ch not in ROLE_EMOJI_SET)
+    return s.strip()
+
+
 def norm_chunk(c):
     """把 3/4/5/6 元组统一成 (text, tag, note, depth, rel, mod, emoji)。
 
@@ -172,10 +255,12 @@ def norm_chunk(c):
     """
     c = list(c) + [None] * (7 - len(c))
     text, tag, note, depth, rel, mod, emoji = c[:7]
-    tag = tag or ""
+    tag = strip_role_emoji(tag or "")
     depth = int(depth or 0)
     if not rel:
         rel = REL_SEP.split(tag)[0].split("+")[0].strip() or tag
+    rel = strip_role_emoji(rel)
+    mod = strip_role_emoji(mod) if mod else mod
     if _is_grammar_only(mod):
         # 提醒：mod 要写「在给谁补充什么」，不是语法术语
         warnings.append("mod 写成了语法术语：%r（应写「在给谁补充什么」，如「补充：被收养的时间」）" % mod)
@@ -213,6 +298,7 @@ def render_sentence(pnum, punct, chunks):
         cks.append('<span class="ck" style="background:%s;color:%s">%s</span>' % (bg, fg, t))
         metas.append({"num": i + 1, "tag": tag, "note": note, "depth": depth,
                       "emoji": emoji, "rel": rel, "mod": mod,
+                      "cat": role_cat(emoji, rel, tag),
                       "bg": bg, "fg": fg, "html": t})
 
     # 本层末行标记：看后面还有没有同层或更深层的行
@@ -230,12 +316,12 @@ def render_sentence(pnum, punct, chunks):
         mod_html = ('<span class="mod">%s</span>' % mod) if mod else ''
         lys.append('<div class="ly d%d">%s'
                    '<span class="chip" style="background:%s">%d</span>'
-                   '<span class="role" title="%s">%s</span>'
-                   '%s<span class="tg">%s</span>'
+                   '<span class="role" data-cat="%s" title="%s %s"></span>'
                    '<span class="sg" style="color:%s">%s</span>'
+                   '%s<span class="tg">%s</span>'
                    '<span class="note">%s</span></div>'
-                   % (m["depth"], branch, m["bg"], m["num"], m["rel"], m["emoji"],
-                      mod_html, m["tag"], m["fg"], m["html"], m["note"]))
+                   % (m["depth"], branch, m["bg"], m["num"], m["cat"],
+                      m["emoji"], m["rel"], m["fg"], m["html"], mod_html, m["tag"], m["note"]))
     head = '<span class="pnum">P%d</span>' % pnum if pnum else ''
     return ('<div class="sent">%s%s%s\n<div class="brk">%s</div></div>'
             % (head, " ".join(cks), punct, "".join(lys)))
@@ -319,9 +405,9 @@ def build(content_path, out_path):
 
 <h2 class="section">二、全文精读（重点词已标注①，见词汇表）</h2>
 
-<div class="legend"><span class="item" style="background:#dbeafe;color:#1e3a8a">🧱 色块拆解</span>正文按句子成分分色；句下拆解框里<b>编号 ↔ 色块 ↔ 汉语解释</b>一一对应。第二列是<b>与上级的关系标记</b>：🔵骨架/主语　🟢谓语/祈使　🟠宾语/表语/引语　🟡定语/同位语　🟣非谓语状语（不定式·分词·介词短语）　🩵限定从句（含时间/条件/定语从句）　🟤并列　🔴转折/过渡。读法：<b>缩进就是挂接层级</b>——往右缩进的成分挂在上一行下面；先抓最左边不缩进的那一两个词（骨架），其余都是往右挂的补充。</div>
+%s
 
-%s""" % (TITLE, SUB, DATE, g("BACKGROUND", ""), render_speech(PARAS)))
+%s""" % (TITLE, SUB, DATE, g("BACKGROUND", ""), role_legend(), render_speech(PARAS)))
 
     if VOCAB:
         parts.append("""<h2 class="section">三、重点词汇词源（①—%s 对应正文上标，鼠标悬停正文的 ①②… 即可看词源与释义）</h2>

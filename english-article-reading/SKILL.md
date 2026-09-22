@@ -49,62 +49,74 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 把句子按「意群 / 句子成分」切成若干块，每块一个 `<span class="ck">`，块间用空格分隔：
 
 ```html
-<div class="sent"><span class="pnum">P1</span><span class="ck" style="background:#dbeafe;color:#1e3a8a">I am happy</span> <span class="ck" style="background:#bbf7d0;color:#14532d">to join with you</span> <span class="ck" style="background:#fde68a;color:#78350f">today</span> <span class="ck" style="background:#fbcfe8;color:#831843">in what will go down in history as</span> <span class="ck" style="background:#ddd6fe;color:#4c1d95">the greatest demonstration<span class="sup">①</span> for freedom</span> <span class="ck" style="background:#fed7aa;color:#7c2d12">in the history of our nation</span>.</div>
+<div class="sent"><span class="pnum">P1</span><span class="ck" style="background:#e8effb;color:#1e3a8a">I am happy</span> <span class="ck" style="background:#e6f4ea;color:#14532d">to join with you</span> <span class="ck" style="background:#fdf3d8;color:#7c4a03">today</span> <span class="ck" style="background:#fbe9f2;color:#9d174d">in what will go down in history as</span> <span class="ck" style="background:#eee9fb;color:#5b21b6">the greatest demonstration<span class="sup">①</span> for freedom</span> <span class="ck" style="background:#e9f5f1;color:#0f5f5c">in the history of our nation</span>.</div>
 ```
 
 **六色盘**（按出现顺序循环取用；background / 文字色）：
 
-| # | background | color | 常用角色 |
+| # | background | color | 色相 |
 | --- | --- | --- | --- |
-| 1 | `#dbeafe` | `#1e3a8a` | 主语 / 骨架 |
-| 2 | `#bbf7d0` | `#14532d` | 谓语 / 动作 |
-| 3 | `#fde68a` | `#78350f` | 时间 / 宾语 |
-| 4 | `#fbcfe8` | `#831843` | 从句 / 转折 |
-| 5 | `#ddd6fe` | `#4c1d95` | 核心名词 / 揭示 |
-| 6 | `#fed7aa` | `#7c2d12` | 地点 / 范围 |
+| 1 | `#e8effb` | `#1e3a8a` | 蓝 |
+| 2 | `#e6f4ea` | `#14532d` | 绿 |
+| 3 | `#fdf3d8` | `#7c4a03` | 琥珀 |
+| 4 | `#fbe9f2` | `#9d174d` | 玫红 |
+| 5 | `#eee9fb` | `#5b21b6` | 紫 |
+| 6 | `#e9f5f1` | `#0f5f5c` | 青 |
 
-> 色块颜色**只保证相邻可辨**，不承载语法含义；真正表意的是拆解框第二列的**修饰关系**。
+> 色块底色偏柔和（对比度实测 ≥ 6.6:1），**只保证相邻可辨，不承载语法含义**；
+> 真正表意的是拆解框里的**角色色点**与**修饰关系**。换色盘时务必重测对比度。
 
 ### 2.2 句后拆解框 `.brk`（**以「修饰谁」为主**）
 
 紧跟句子后面，放一个 `.brk`，里面每个 `.ly` 对应一个色块，**数量、编号、颜色、文本完全一致**。
 
-每行结构：`树形连线 + .chip 编号 + .role 角色标记 + .mod 修饰关系 + .tg 语法术语 + .sg 原文 + .note 解释`
+每行结构：`树形连线 + .chip 编号 + .role 角色色点 + .sg 原文 + .mod 修饰关系 + .tg 语法术语 + .note 解释`
 
 ```html
 <div class="brk">
-<div class="ly d0"><span class="chip" style="background:#dbeafe">1</span><span class="role" title="骨架">🔵</span><span class="mod">全句的主干</span><span class="tg">主句</span><span class="sg" style="color:#1e3a8a">She felt very strongly</span><span class="note">骨架只有四个词。feel 是系动词，要用副词 strongly</span></div>
-<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#bbf7d0">2</span><span class="role" title="宾语从句">🩵</span><span class="mod">补充：她坚决认定的内容</span><span class="tg">宾语从句</span><span class="sg" style="color:#14532d">that I should be adopted</span><span class="note">should be adopted 是应然 + 被动</span></div>
-<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#fde68a">3</span><span class="role" title="时间">🟣</span><span class="mod">补充：那件「被收养」发生在什么时候</span><span class="tg">时间状语</span><span class="sg" style="color:#78350f">at birth</span><span class="note">一出生——时间点</span></div>
-<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#fbcfe8">4</span><span class="role" title="施事">🟠</span><span class="mod">补充：那件「被收养」由谁来做</span><span class="tg">施事</span><span class="sg" style="color:#831843">by a lawyer and his wife</span><span class="note">三个介词短语排队右挂，汉语要倒过来译</span></div>
+<div class="ly d0"><span class="chip" style="background:#e8effb">1</span><span class="role" data-cat="skeleton" title="🔵 骨架"></span><span class="sg" style="color:#1e3a8a">She felt very strongly</span><span class="mod">全句的主干</span><span class="tg">主句</span><span class="note">骨架只有四个词。feel 是系动词，要用副词 strongly</span></div>
+<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#e6f4ea">2</span><span class="role" data-cat="clause" title="🩵 宾语从句"></span><span class="sg" style="color:#14532d">that I should be adopted</span><span class="mod">补充：她坚决认定的内容</span><span class="tg">宾语从句</span><span class="note">should be adopted 是应然 + 被动</span></div>
+<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#fdf3d8">3</span><span class="role" data-cat="adv" title="🟣 时间"></span><span class="sg" style="color:#7c4a03">at birth</span><span class="mod">补充：那件「被收养」发生在什么时候</span><span class="tg">时间状语</span><span class="note">一出生——时间点</span></div>
+<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#fbe9f2">4</span><span class="role" data-cat="obj" title="🟠 施事"></span><span class="sg" style="color:#9d174d">by a lawyer and his wife</span><span class="mod">补充：那件「被收养」由谁来做</span><span class="tg">施事</span><span class="note">三个介词短语排队右挂，汉语要倒过来译</span></div>
 </div>
 ```
 
-- **`.mod` 是主视觉**（深色加粗）：一句话说清「这块在给哪一块、补充什么信息」。
+- **`.mod` 是主视觉**（深色加粗，紧跟在英文后面）：一句话说清「这块在给哪一块、补充什么信息」。
   写法：**动词开头 + 具体指向**——`补充：…发生的时候` / `限定：是哪个 man` / `交代：动作由谁来做` /
   `另起一条主干——前面是打算，这里是结果`。**不要只写「时间状语」「宾语从句」这类术语**（脚本会告警）。
-- `.tg` 语法术语（灰色小字）：只当索引，写规范说法即可；与 `.mod` 重复时可省略。
+- **`.role` 是 CSS 画的色点**，不写 emoji：`<span class="role" data-cat="clause" title="🩵 宾语从句"></span>`。
+  `data-cat` 取 `skeleton / pred / obj / attr / adv / clause / coord / contrast`（见下表），
+  emoji 只放在 `title` 里做提示。**不要用 emoji 当可见标记**——缺 emoji 字体的环境（很多 Linux /
+  无头 Chrome）会把它们渲染成单色方块，整列标记变成一片灰，配色设计直接失效。
 - `.chip` 的 `background` = 对应 `.ck` 的 `background`（编号 1、2、3…）。
-- `.role` 的 **emoji = 这块与上一级的关系**，取值见下表；写不出来会显示 `⬜`。
 - `.tbranch` 树形连线**手写**（`├─` / `└─` / `│` / 全角空格）；用生成器时自动算好。
 - `.sg` 的 `color` 和文本 = 对应 `.ck` 的 `color` 和文本。
+- `.tg` 语法术语（灰色小字）：只当索引，写规范说法即可；与 `.mod` 重复时可省略。
 - `.note` 讲语法点 / 易错点 / 修辞作用，**不要重复 `.mod` 已经说过的**。
 
-**角色标记（`.role`）对照表** —— 判不准就按「从句优先于非谓语」定：
+> ⚠️ **别让 `.mod` 换行**：实测把 `.mod` 或 `.sg` 改成块级（独占一行）会让 142 句的长文
+> PDF 从 20 页涨到 32–39 页。层级靠「色点 + 深色粗体 vs 灰色小字」的对比来做，不靠换行。
 
-| emoji | 用于 |
-| --- | --- |
-| 🔵 | 骨架、主句、主语、主谓、分句一/二/三、倒装、形式主语、开场致谢、短句 |
-| 🟢 | 谓语、动作、系表、祈使、被动谓语 |
-| 🟠 | 宾语、表语、双宾、补语/宾补、引语（直接引语）、施事 |
-| 🟡 | 定语、同位语、补充修饰 |
-| 🟣 | **非谓语**状语：不定式、分词、动名词、介词短语、时间/地点/目的/原因/方式/条件（短语形式） |
-| 🩵 | **限定从句**：宾语/表语/主语/同位语/定语/状语从句（含时间从句、条件从句、比较从句）、存在句 |
-| 🟤 | 并列（并列谓语、并列主语、并列结果） |
-| 🔴 | 转折、让步、对比、过渡、判断、结论、收束 |
+
+**角色色点（`.role[data-cat]`）对照表** —— 判不准就按「从句优先于非谓语」定：
+
+| data-cat | 色点 | 色值 | 用于 |
+| --- | --- | --- | --- |
+| `skeleton` | ⚫ | `#475569` | 骨架、主句、主语、主谓、分句一/二/三、倒装、形式主语、开场致谢、短句 |
+| `pred` | 🟢 | `#0d7d74` | 谓语、动作、系表、祈使、被动谓语 |
+| `obj` | 🟠 | `#b45309` | 宾语、表语、双宾、补语/宾补、引语、施事/受事 |
+| `attr` | 🟣 | `#7c3aed` | 定语、同位语、补充修饰 |
+| `adv` | 🔵 | `#2563eb` | **非谓语**状语：不定式、分词、动名词、介词短语 |
+| `clause` | 🔷 | `#0891b2` | **限定从句**：宾语/表语/主语/同位语/定语/状语从句、存在句 |
+| `coord` | 🟢 | `#65a30d` | 并列（并列谓语、并列主语、并列结果） |
+| `contrast` | 🔴 | `#be123c` | 转折、让步、对比、过渡、判断、结论、收束 |
+
+> 色值定义在 `template.html` 与 `build_mobile.py` 的 `:root`（`--r-skeleton` 等），两份**必须一致**。
+> 生成器里的 `ROLE_TABLE` 是唯一色源，图例由它生成——改色只改这三处，别在图例里硬编码。
 
 > ⚠️ **🟣 与 🩵 的边界**：同样是"时间"，`at birth`（短语）用 🟣，`when I popped out`（从句）用 🩵。
 > 判据是**有没有主谓**，不是语义类别。
+
 
 ### 2.3 分层设计要点
 
@@ -179,7 +191,7 @@ TIPS_INTRO = "跟读要点开头说明（可选）"
 # 色块 = (英文, 语法标签, 汉语解释)                              ← 旧格式，扁平，层级 0
 #      = (英文, 语法标签, 汉语解释, 层级)                         ← 加挂接层级
 #      = (英文, 语法标签, 汉语解释, 层级, 关系名, mod)             ← 完整写法（推荐）
-#      = (英文, 语法标签, 汉语解释, 层级, 关系名, mod, emoji)      ← 再覆盖角色 emoji
+#      = (英文, 语法标签, 汉语解释, 层级, 关系名, mod, emoji)      ← 再覆盖角色（emoji 作角色键）
 #   其中 mod =「这块在给谁补充什么信息」，是主视觉，务必写具体
 PARAS = [
     [(".", [
@@ -206,8 +218,8 @@ FOOTER     = "页脚文字"     # 可选
 - 每句颜色从六色盘自动循环，**不用手写颜色**。
 - **层级（第 4 个元素）**：`0` = 骨架；`1` = 直接挂骨架；`2` = 再挂一层……省略即 `0`。
   树形连线（`├─`/`└─`/`│`）由脚本按层级自动算，**不用手写**。
-- **角色 emoji（第 7 个元素）**：省略时按语法标签自动推断（见 2.2 对照表）；
-  推断不出会显示 `⬜`——看到 `⬜` 说明该标签没被收录，补一个更规范的语法标签即可。
+- **角色（第 7 个元素）**：填 emoji 作角色键（`🔵`/`🩵`…），脚本据此选色点颜色；
+  省略时按语法标签自动推断（见 2.2 对照表）。**色点是 CSS 画的，不是 emoji**。
 - **`mod`（第 6 个元素）强烈建议手写**：省略时脚本会用「关系名」兜底生成，
   但兜底只知道关系类别（如「补充：时间」），**说不出具体修饰了哪一块**，语义会偏泛。
   只有 3 项的旧模块能照常生成，只是 `mod` 偏模板化——重做该文时补上即可。
@@ -305,7 +317,7 @@ python3 /home/crf/.claude/skills/english-article-reading/gen_audio.py \
 - **三者对齐**：`.ck` 色块、`.chip` 编号、`.sg` 文本必须严格一一对应，否则拆解框会错位。
 - **层级不跳级**：`d2` 上面必须能找到 `d1`。层级是相对**上一行**的挂接关系，不是绝对缩进。
 - **🟣 / 🩵 边界**：非谓语状语（不定式、分词、介词短语）用 🟣；有主谓的限定从句用 🩵。
-- 见到 `⬜` 角色标记，说明该语法标签未收录——换成 2.2 表里的规范说法，或补映射。
+- 语法标签若不被映射表收录，色点会退成默认的蓝色（非谓语状语）——换成 2.2 表里的规范说法，或补映射。
 - **标题只写一次**：句子结构说明放一个 `.legend`，不要每句重复。
 - **CSS 不动**：模板样式是排好版的，只填内容；确需新色再在 `<style>` 里增补。
 - Chrome 转 PDF 必须带 `--no-pdf-header-footer`，否则出现浏览器页眉页脚。
