@@ -22,8 +22,8 @@ def main(path):
     css = io.open(os.path.join(HERE, "read_aloud.css"), encoding="utf-8").read()
     js = io.open(os.path.join(HERE, "read_aloud.js"), encoding="utf-8").read()
 
-    if ".say{" not in h and ".say {" not in h:
-        h = h.replace("</style>", css + "\n</style>", 1)
+    h = re.sub(r'/\* ra-start \*/.*?/\* ra-end \*/', '', h, flags=re.S)
+    h = h.replace("</style>", css + "\n</style>", 1)
 
     h = re.sub(r'<script>\s*/\* -+ 朗读.*?</script>', '', h, flags=re.S)
     h = h.replace("</body>", "</body>\n<script>\n" + js + "\n</script>", 1)

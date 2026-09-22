@@ -16,8 +16,8 @@ def process(path):
         print("skip (not full html):", path); return
     css = io.open(os.path.join(HERE, "pronounce.css"), encoding="utf-8").read()
     js = io.open(os.path.join(HERE, "pronounce.js"), encoding="utf-8").read()
-    if ".psay{" not in h and ".psay {" not in h:
-        h = h.replace("</style>", css + "\n</style>", 1)
+    h = re.sub(r'/\* pron-start \*/.*?/\* pron-end \*/', '', h, flags=re.S)
+    h = h.replace("</style>", css + "\n</style>", 1)
     h = re.sub(r'<script>\s*/\* -+ 单词发音.*?</script>', '', h, flags=re.S)
     h = h.replace("</body>", "</body>\n<script>\n" + js + "\n</script>", 1)
     io.open(path, "w", encoding="utf-8").write(h)

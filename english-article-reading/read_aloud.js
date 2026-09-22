@@ -1,5 +1,10 @@
 /* ---------- 朗读：优先播放预生成音频(data-audio)，否则用系统语音 ---------- */
 (function () {
+  var ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>';
+  var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><rect x="6.5" y="5" width="3.5" height="14" rx="1"/><rect x="14" y="5" width="3.5" height="14" rx="1"/></svg>';
+  var ICON_STOP = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+
   var sents = Array.prototype.slice.call(document.querySelectorAll(".speech .sent"));
   if (!sents.length) return;
 
@@ -81,7 +86,7 @@
   sents.forEach(function (sent) {
     var b = document.createElement("button");
     b.type = "button"; b.className = "say";
-    b.textContent = "\uD83D\uDD0A";
+    b.innerHTML = ICON_SPEAKER;
     b.title = "朗读这句"; b.setAttribute("aria-label", "朗读这句");
     b.addEventListener("click", function (e) {
       e.stopPropagation(); e.preventDefault();
@@ -96,16 +101,19 @@
 
   var bar = document.createElement("div");
   bar.id = "tts-bar";
-  bar.innerHTML = '<button data-act="play">\u25B6 朗读全文</button>' +
-                  '<button data-act="stop">\u25A0 停止</button>' +
+  bar.innerHTML = '<button data-act="play">' + ICON_PLAY + ' 朗读全文</button>' +
+                  '<button data-act="stop">' + ICON_STOP + ' 停止</button>' +
                   '<button data-act="rate" class="rate">0.95\u00D7</button>';
   document.body.appendChild(bar);
   function updateBar() {
     var pb = bar.querySelector('[data-act="play"]');
-    pb.textContent = (playing && !paused) ? "\u23F8 暂停" : (paused ? "\u25B6 继续" : "\u25B6 朗读全文");
+    pb.innerHTML = (playing && !paused) ? (ICON_PAUSE + " 暂停")
+                 : (paused ? (ICON_PLAY + " 继续") : (ICON_PLAY + " 朗读全文"));
   }
   bar.addEventListener("click", function (e) {
-    var t = e.target, act = t.getAttribute && t.getAttribute("data-act");
+    var btn = e.target.closest ? e.target.closest("button") : null;
+    if (!btn) return;
+    var act = btn.getAttribute("data-act");
     if (act === "play") {
       if (playing && !paused) {
         paused = true;
@@ -122,7 +130,7 @@
       stopAll();
     } else if (act === "rate") {
       rate = rate >= 1.3 ? 0.8 : Math.round((rate + 0.1) * 100) / 100;
-      t.textContent = rate.toFixed(2) + "\u00D7";
+      btn.textContent = rate.toFixed(2) + "\u00D7";
       audio.playbackRate = rate;
     }
   });
