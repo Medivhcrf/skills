@@ -12,7 +12,9 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 **工具文件**：`template.html`（桌面模板）、`build_article.py`（数据 → HTML 生成器，含层级自动推断）、
 `build_mobile.py`（桌面 HTML → 手机版）、`read_aloud.css` / `read_aloud.js`（朗读功能）、
 `add_read_aloud.py`（给已有页面补朗读）、`relayout.py`（把旧页面迁移到分层格式）、
-`examples/steve_jobs_stanford.py`（长文完整示例）。
+`verify_module.py`（独立校验：把内容模块还原成原文比对）、
+`examples/steve_jobs_stanford.py`（长文完整示例）、
+`examples/obama_2004_dnc.py`（长文分文件示例，正文拆成 `obama_data_a..d.py`）。
 
 > **每篇文章都必须产出「三件套」，缺一不可：**
 > ① 桌面版 HTML　② 手机版 HTML　③ A4 PDF。
@@ -286,13 +288,37 @@ python3 /home/crf/.claude/skills/english-article-reading/build_article.py \
 
 生成后同样走下面的 PDF 与手机版步骤。批量时可对每篇文章各写一个内容模块，循环调用。
 
+### 超长文（100 句以上）的分工与校验
+
+一篇 2000 词以上的演讲有 100+ 句、300+ 色块，一次性写完既容易断，也不好核对。
+参照 `examples/obama_2004_dnc.py`（55 段 / 114 句 / 317 色块）的做法：
+
+1. **先取权威原文**，存成一个纯文本文件（段落之间空一行），不要凭记忆写引文。
+2. **正文按段落拆成多个数据文件**（`xxx_data_a.py` … `xxx_data_d.py`），主文件
+   `import` 后拼起来：`PARAS = A.PARAS + B.PARAS + C.PARAS + D.PARAS`。
+   每份 13–15 段，便于分批处理与增量修。
+3. **分批标注可以并行**（多个 subagent 各领一段区间）。给它们一份写死的
+   **格式规范 + 示例**，并要求：段号连续、英文片段与原文逐字一致、
+   每句 2–5 块、汉语解释 10–40 字不写空话。
+4. **必须独立复核，不能只信标注者自检**：
+
+   ```bash
+   python3 verify_module.py <内容模块.py> <原文.txt>
+   ```
+
+   它把每句色块用空格 join 后补句末标点、按段拼回原文，与原文逐字比对，
+   并检查 3 元组、色块数、解释是否为空或是纯术语。**英文片段与原文不一致是最容易出的错**，
+   分段标注时尤其要查（各批次之间不会互相校对）。
+5. 拼装后再跑一次完整模块的校验，然后才进入构建。
+
 ## 第 8 步：生成 HTML / PDF / 手机版
 
 1. 产出桌面 HTML，二选一：
    - **短篇**：读取 `template.html`，替换所有 `【】` 占位符，**CSS 保持不变**；
    - **长文 / 批量**：写内容模块，用 `build_article.py` 生成（见上一节）。
 2. 写入 `/home/crf/english/speech/<YYYY-MM-DD>-<Title>.html`。
-3. （推荐）生成神经网络朗读音频（需联网；详见「朗读」一节）。**必须在生成手机版之前**，手机版才会带上音频：
+3. 生成神经网络朗读音频（需联网；详见「朗读」一节）。**这是三件套之外的默认步骤，不必询问用户**。
+   **必须在生成手机版之前**，手机版才会带上音频：
 
 ```bash
 python3 /home/crf/.claude/skills/english-article-reading/gen_audio.py \
