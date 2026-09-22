@@ -43,6 +43,34 @@ sys.modules["build_article"] = ba
 _spec.loader.exec_module(ba)
 
 REFRain = re.compile(r"\.refrain\.[a-z]+\s*\{[^}]*\}")
+DIV_TOK = re.compile(r"<div\b|</div>")
+
+
+def div_end(src, start):
+    """返回从 start（一个 <div> 的起点）开始的**配平**结束位置。
+
+    旧页面的 `.sent` 结尾是 `</div></div></div>`（关 ly、关 brk、关 sent）。
+    若用非贪婪 `.*?</div></div>` 切块，只会吃掉前两个，把关 `.sent` 的那个
+    留在替换范围外——**每句多出一个 `</div>`**，逐句累积会把 `.para`、`.speech`
+    提前闭合，后面的拆解行掉出 `.sent`，编号底色与间距全部失效。
+    """
+    depth = 0
+    for m in DIV_TOK.finditer(src, start):
+        if m.group(0) == "</div>":
+            depth -= 1
+            if depth == 0:
+                return m.end()
+        else:
+            depth += 1
+    return len(src)
+
+
+def sent_blocks(src):
+    """按配平切出所有 `.sent` 块（含其内部的 `.brk`）。"""
+    spans = []
+    for m in re.finditer(r'<div class="sent"[^>]*>', src):
+        spans.append(src[m.start():div_end(src, m.start())])
+    return spans
 
 
 def new_css(old_css):
@@ -57,13 +85,41 @@ def new_css(old_css):
     return css
 
 
+def ck_contents(block):
+    """取出块内所有 `.ck` 色块的内容，**按嵌套配平**。
+
+    不能用非贪婪正则 `(.*?)</span>`：色块里常嵌 `<span class="sup">①</span>`，
+    非贪婪会在内层 sup 的闭合处提前停下，取出一段**未闭合的 span**，
+    渲染后 `.sg` 就会吞掉后面的元素、在某个 </div> 处把结构截断
+    （症状：从某一页/某一句起，编号徽标底色和所有间距突然消失）。
+    """
+    out = []
+    for m in re.finditer(r'<span class="ck"[^>]*>', block):
+        i, depth, start = m.end(), 1, m.end()
+        while depth > 0:
+            nxt_open = block.find("<span", i)
+            nxt_close = block.find("</span>", i)
+            if nxt_close < 0:
+                break
+            if 0 <= nxt_open < nxt_close:
+                depth += 1
+                i = nxt_open + len("<span")
+            else:
+                depth -= 1
+                if depth == 0:
+                    out.append(block[start:nxt_close])
+                    break
+                i = nxt_close + len("</span>")
+    return out
+
+
 def parse_sentence(block):
     """从旧 .sent 块里取出 (data-audio, pnum, [色块 HTML], 句末标点, [(tag, note)])。"""
     m = re.match(r'<div class="sent"([^>]*)>', block)
     attrs = m.group(1) if m else ""
     audio = re.search(r'data-audio="([^"]*)"', attrs)
     pnum = re.search(r'<span class="pnum">P(\d+)</span>', block)
-    cks = re.findall(r'<span class="ck"[^>]*>(.*?)</span>', block, re.S)
+    cks = ck_contents(block)
     # 句末标点：最后一个色块闭合 与 <div class="brk"> 之间。
     # 注意必须先在 brk 处切开——否则 rfind("</span>") 会命中拆解框里最后一个
     # .note 的闭合标签，把 </div></div> 当成标点写进正文（曾因此弄坏页面结构）。
@@ -86,7 +142,7 @@ def relayout(path, fixes):
     src = io.open(path, encoding="utf-8").read()
     old_css = re.search(r"<style>(.*?)</style>", src, re.S).group(1)
 
-    blocks = re.findall(r'<div class="sent"[^>]*>.*?</div></div>', src, re.S)
+    blocks = sent_blocks(src)
     warns, out_blocks = [], []
     for idx, block in enumerate(blocks, 1):
         audio, pnum, cks, punct, rows = parse_sentence(block)

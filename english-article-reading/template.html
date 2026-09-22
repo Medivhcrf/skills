@@ -115,20 +115,21 @@
   .speech .sent { margin: 3px 0; }
   .speech .ck { border-radius: 2px; padding: 0 1px; }
   .speech .sup { font-size: 62%; vertical-align: super; color: #b91c1c; cursor: help; }
+  /* 编号徽标：用内边距自适应尺寸，不用固定 height/line-height。
+     固定高度在 A4 打印（尤其整页被缩放时）会让数字跑到框外、框被压成细条。 */
   .speech .chip {
-    display: inline-block; min-width: 14px; height: 14px; line-height: 14px;
-    text-align: center; color: #fff; font-size: 8pt; font-weight: bold;
-    border-radius: 4px; margin-right: 6px; padding: 0 2px;
-    font-family: 'DejaVu Sans', sans-serif; vertical-align: 0;
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, .18);
+    display: inline-block; padding: 1px 5px; border-radius: 4px;
+    color: #fff; font-size: 7.6pt; font-weight: bold; line-height: 1.25;
+    text-align: center; margin-right: 6px;
+    font-family: 'DejaVu Sans', sans-serif; vertical-align: 1px;
   }
 
-  /* 句子编号：做成实心徽标，和正文明确分开（原来是很浅的灰字，容易和内容连成一片） */
+  /* 句子编号：同样用内边距自适应 */
   .speech .pnum {
     display: inline-block; background: #334155; color: #fff;
-    font-size: 7.5pt; font-weight: bold; border-radius: 4px;
-    padding: 0 5px; margin-right: 7px; vertical-align: 1px;
-    font-family: 'DejaVu Sans', sans-serif; letter-spacing: .3px;
+    font-size: 7.4pt; font-weight: bold; border-radius: 4px;
+    padding: 1px 6px; margin-right: 7px; vertical-align: 1px;
+    line-height: 1.25; font-family: 'DejaVu Sans', sans-serif; letter-spacing: .3px;
   }
   .speech .kw {
     color: #b91c1c; font-weight: bold;
