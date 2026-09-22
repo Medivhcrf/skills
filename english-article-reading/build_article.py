@@ -29,12 +29,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TPL = os.path.join(HERE, "template.html")
 
 PALETTE = [
-    ("#e8effb", "#1e3a8a"),   # 蓝
-    ("#e6f4ea", "#14532d"),   # 绿
-    ("#fdf3d8", "#7c4a03"),   # 琥珀
-    ("#fbe9f2", "#9d174d"),   # 玫红
-    ("#eee9fb", "#5b21b6"),   # 紫
-    ("#e9f5f1", "#0f5f5c"),   # 青
+    ("#c3d9f7", "#16306b"),   # 蓝
+    ("#c2e6ce", "#0f4023"),   # 绿
+    ("#f8dd9e", "#6b3f02"),   # 琥珀
+    ("#f6c2db", "#8a1244"),   # 玫红
+    ("#d7cbf5", "#4a1a9e"),   # 紫
+    ("#bde3d7", "#0a4f4d"),   # 青
 ]
 CIRC = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚"
 
@@ -73,13 +73,13 @@ TREE = ("├─", "└─", "│", "　")  # ├─ └─ │ 全角空格
 # 角色类别 → (中文名, 色值)。**唯一色源**：色点、图例都由它生成，
 # 避免图例里硬编码的色值和实际渲染脱节。
 ROLE_TABLE = [
-    ("skeleton", "骨架 / 主语", "#475569"),
-    ("pred",     "谓语 / 动作", "#0d7d74"),
+    ("skeleton", "骨架 / 主语", "#334155"),
+    ("pred",     "谓语 / 动作", "#0f766e"),
     ("obj",      "宾语 / 施事", "#b45309"),
-    ("attr",     "定语 / 同位语", "#7c3aed"),
-    ("adv",      "非谓语状语", "#2563eb"),
-    ("clause",   "限定从句", "#0891b2"),
-    ("coord",    "并列", "#65a30d"),
+    ("attr",     "定语 / 同位语", "#6d28d9"),
+    ("adv",      "非谓语状语", "#1d4ed8"),
+    ("clause",   "限定从句", "#0e7490"),
+    ("coord",    "并列", "#4d7c0f"),
     ("contrast", "转折 / 过渡", "#be123c"),
 ]
 ROLE_NAME = dict((k, n) for k, n, _ in ROLE_TABLE)
@@ -177,7 +177,6 @@ MOD_BY_REL = {
     "🔴": ("转折", "把前面的话拐个弯"),
     "🔵": ("骨架", "全句的主干"),
 }
-# 作者已在 mod 里写过的「关系称呼」，兜底前先去掉，避免「补充：补充：…」
 # 作者已在 mod 里写过的「关系称呼」；命中则直接原样用，不再加前缀
 MOD_LEAD = ("补充", "限定", "交代", "说明", "并列", "转折", "骨架", "修饰",
             "解释", "回指", "另起", "追加", "强调", "收束")
@@ -239,6 +238,23 @@ def strip_role_emoji(s):
     return s.strip()
 
 
+# note 里引用角色 emoji 时（如「是从句（🩵）不是短语（🟣）」），
+# 换成不依赖 emoji 字体的文字说法，否则在无 emoji 环境下会变成方块。
+NOTE_EMOJI_WORD = {
+    "🔵": "骨架色", "🟢": "谓语色", "🟠": "宾语色", "🟡": "定语色",
+    "🟣": "状语色", "🩵": "从句色", "🟤": "并列色", "🔴": "转折色",
+}
+
+
+def normalize_note(s):
+    """把 note 里的角色 emoji 换成文字说法（其余照原样）。"""
+    if not s:
+        return s
+    for e, w in NOTE_EMOJI_WORD.items():
+        s = s.replace(e, w)
+    return s
+
+
 def norm_chunk(c):
     """把 3/4/5/6 元组统一成 (text, tag, note, depth, rel, mod, emoji)。
 
@@ -267,7 +283,7 @@ def norm_chunk(c):
     if not emoji:
         emoji = infer_emoji(tag, rel)
     mod = infer_mod(rel, tag, depth, emoji, mod)
-    return (text, tag, note or "", depth, rel, mod, emoji)
+    return (text, tag, normalize_note(note or ""), depth, rel, mod, emoji)
 
 
 def build_branches(metas):

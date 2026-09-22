@@ -35,8 +35,8 @@ MOBILE_CSS = r"""
     --bg:#f3f4f8; --card:#ffffff; --ink:#1f2937; --line:#e5e7eb;
     --red:#b91c1c; --red-d:#7f1d1d; --blue:#1e3a8a;
     /* 角色色点：与桌面版同一套语义色 */
-    --r-skeleton:#475569; --r-pred:#0d7d74; --r-obj:#b45309; --r-attr:#7c3aed;
-    --r-adv:#2563eb; --r-clause:#0891b2; --r-coord:#65a30d; --r-contrast:#be123c;
+    --r-skeleton:#334155; --r-pred:#0f766e; --r-obj:#b45309; --r-attr:#6d28d9;
+    --r-adv:#1d4ed8; --r-clause:#0e7490; --r-coord:#4d7c0f; --r-contrast:#be123c;
     --brk-line:#cbd5e1; --brk-bg:#fafbfc;
     --pad:14px;
   }
@@ -122,8 +122,9 @@ MOBILE_CSS = r"""
   .speech .brk .tbranch{ color:#b8c4d0; white-space:pre; margin-right:1px; }
   /* 角色色点：CSS 画的小圆点，与桌面版一致 */
   .speech .brk .role{
-    display:inline-block; width:8px; height:8px; border-radius:50%;
-    margin:0 6px 0 1px; vertical-align:1px; background:var(--r-skeleton);
+    display:inline-block; width:12px; height:12px; border-radius:50%;
+    margin:0 7px 0 1px; vertical-align:-1px; background:var(--r-skeleton);
+    box-shadow:0 0 0 1px rgba(255,255,255,.9);
   }
   .speech .brk .role[data-cat="skeleton"]{ background:var(--r-skeleton); }
   .speech .brk .role[data-cat="pred"]{ background:var(--r-pred); }

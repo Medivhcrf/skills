@@ -49,22 +49,23 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 把句子按「意群 / 句子成分」切成若干块，每块一个 `<span class="ck">`，块间用空格分隔：
 
 ```html
-<div class="sent"><span class="pnum">P1</span><span class="ck" style="background:#e8effb;color:#1e3a8a">I am happy</span> <span class="ck" style="background:#e6f4ea;color:#14532d">to join with you</span> <span class="ck" style="background:#fdf3d8;color:#7c4a03">today</span> <span class="ck" style="background:#fbe9f2;color:#9d174d">in what will go down in history as</span> <span class="ck" style="background:#eee9fb;color:#5b21b6">the greatest demonstration<span class="sup">①</span> for freedom</span> <span class="ck" style="background:#e9f5f1;color:#0f5f5c">in the history of our nation</span>.</div>
+<div class="sent"><span class="pnum">P1</span><span class="ck" style="background:#c3d9f7;color:#16306b">I am happy</span> <span class="ck" style="background:#c2e6ce;color:#14532d">to join with you</span> <span class="ck" style="background:#f8dd9e;color:#6b3f02">today</span> <span class="ck" style="background:#f6c2db;color:#8a1244">in what will go down in history as</span> <span class="ck" style="background:#d7cbf5;color:#4a1a9e">the greatest demonstration<span class="sup">①</span> for freedom</span> <span class="ck" style="background:#bde3d7;color:#0a4f4d">in the history of our nation</span>.</div>
 ```
 
 **六色盘**（按出现顺序循环取用；background / 文字色）：
 
 | # | background | color | 色相 |
 | --- | --- | --- | --- |
-| 1 | `#e8effb` | `#1e3a8a` | 蓝 |
-| 2 | `#e6f4ea` | `#14532d` | 绿 |
-| 3 | `#fdf3d8` | `#7c4a03` | 琥珀 |
-| 4 | `#fbe9f2` | `#9d174d` | 玫红 |
-| 5 | `#eee9fb` | `#5b21b6` | 紫 |
-| 6 | `#e9f5f1` | `#0f5f5c` | 青 |
+| 1 | `#c3d9f7` | `#16306b` | 蓝 |
+| 2 | `#c2e6ce` | `#0f4023` | 绿 |
+| 3 | `#f8dd9e` | `#6b3f02` | 琥珀 |
+| 4 | `#f6c2db` | `#8a1244` | 玫红 |
+| 5 | `#d7cbf5` | `#4a1a9e` | 紫 |
+| 6 | `#bde3d7` | `#0a4f4d` | 青 |
 
-> 色块底色偏柔和（对比度实测 ≥ 6.6:1），**只保证相邻可辨，不承载语法含义**；
-> 真正表意的是拆解框里的**角色色点**与**修饰关系**。换色盘时务必重测对比度。
+> 色块走**明显**档：底色饱和度足够高、块与块一眼可分，文字色同步加深，
+> 对比度实测 **6.1–8.7:1**（远超 WCAG AA 的 4.5），所以"明显"并没有牺牲可读性。
+> **只保证相邻可辨，不承载语法含义**；真正表意的是角色色点与修饰关系。换色必须重测对比度。
 
 ### 2.2 句后拆解框 `.brk`（**以「修饰谁」为主**）
 
@@ -74,10 +75,10 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 
 ```html
 <div class="brk">
-<div class="ly d0"><span class="chip" style="background:#e8effb">1</span><span class="role" data-cat="skeleton" title="🔵 骨架"></span><span class="sg" style="color:#1e3a8a">She felt very strongly</span><span class="mod">全句的主干</span><span class="tg">主句</span><span class="note">骨架只有四个词。feel 是系动词，要用副词 strongly</span></div>
-<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#e6f4ea">2</span><span class="role" data-cat="clause" title="🩵 宾语从句"></span><span class="sg" style="color:#14532d">that I should be adopted</span><span class="mod">补充：她坚决认定的内容</span><span class="tg">宾语从句</span><span class="note">should be adopted 是应然 + 被动</span></div>
-<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#fdf3d8">3</span><span class="role" data-cat="adv" title="🟣 时间"></span><span class="sg" style="color:#7c4a03">at birth</span><span class="mod">补充：那件「被收养」发生在什么时候</span><span class="tg">时间状语</span><span class="note">一出生——时间点</span></div>
-<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#fbe9f2">4</span><span class="role" data-cat="obj" title="🟠 施事"></span><span class="sg" style="color:#9d174d">by a lawyer and his wife</span><span class="mod">补充：那件「被收养」由谁来做</span><span class="tg">施事</span><span class="note">三个介词短语排队右挂，汉语要倒过来译</span></div>
+<div class="ly d0"><span class="chip" style="background:#c3d9f7">1</span><span class="role" data-cat="skeleton" title="🔵 骨架"></span><span class="sg" style="color:#16306b">She felt very strongly</span><span class="mod">全句的主干</span><span class="tg">主句</span><span class="note">骨架只有四个词。feel 是系动词，要用副词 strongly</span></div>
+<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#c2e6ce">2</span><span class="role" data-cat="clause" title="🩵 宾语从句"></span><span class="sg" style="color:#14532d">that I should be adopted</span><span class="mod">补充：她坚决认定的内容</span><span class="tg">宾语从句</span><span class="note">should be adopted 是应然 + 被动</span></div>
+<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#f8dd9e">3</span><span class="role" data-cat="adv" title="🟣 时间"></span><span class="sg" style="color:#6b3f02">at birth</span><span class="mod">补充：那件「被收养」发生在什么时候</span><span class="tg">时间状语</span><span class="note">一出生——时间点</span></div>
+<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#f6c2db">4</span><span class="role" data-cat="obj" title="🟠 施事"></span><span class="sg" style="color:#8a1244">by a lawyer and his wife</span><span class="mod">补充：那件「被收养」由谁来做</span><span class="tg">施事</span><span class="note">三个介词短语排队右挂，汉语要倒过来译</span></div>
 </div>
 ```
 
@@ -93,6 +94,8 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 - `.sg` 的 `color` 和文本 = 对应 `.ck` 的 `color` 和文本。
 - `.tg` 语法术语（灰色小字）：只当索引，写规范说法即可；与 `.mod` 重复时可省略。
 - `.note` 讲语法点 / 易错点 / 修辞作用，**不要重复 `.mod` 已经说过的**。
+  若要在 note 里指代某个色点，**别写 emoji**（会变方块），写文字：`是从句（从句色）不是短语（状语色）`。
+  生成器会自动把 note 里的角色 emoji 换成这套文字说法。
 
 > ⚠️ **别让 `.mod` 换行**：实测把 `.mod` 或 `.sg` 改成块级（独占一行）会让 142 句的长文
 > PDF 从 20 页涨到 32–39 页。层级靠「色点 + 深色粗体 vs 灰色小字」的对比来做，不靠换行。
@@ -102,13 +105,13 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 
 | data-cat | 色点 | 色值 | 用于 |
 | --- | --- | --- | --- |
-| `skeleton` | ⚫ | `#475569` | 骨架、主句、主语、主谓、分句一/二/三、倒装、形式主语、开场致谢、短句 |
-| `pred` | 🟢 | `#0d7d74` | 谓语、动作、系表、祈使、被动谓语 |
+| `skeleton` | ⚫ | `#334155` | 骨架、主句、主语、主谓、分句一/二/三、倒装、形式主语、开场致谢、短句 |
+| `pred` | 🟢 | `#0f766e` | 谓语、动作、系表、祈使、被动谓语 |
 | `obj` | 🟠 | `#b45309` | 宾语、表语、双宾、补语/宾补、引语、施事/受事 |
-| `attr` | 🟣 | `#7c3aed` | 定语、同位语、补充修饰 |
-| `adv` | 🔵 | `#2563eb` | **非谓语**状语：不定式、分词、动名词、介词短语 |
-| `clause` | 🔷 | `#0891b2` | **限定从句**：宾语/表语/主语/同位语/定语/状语从句、存在句 |
-| `coord` | 🟢 | `#65a30d` | 并列（并列谓语、并列主语、并列结果） |
+| `attr` | 🟣 | `#6d28d9` | 定语、同位语、补充修饰 |
+| `adv` | 🔵 | `#1d4ed8` | **非谓语**状语：不定式、分词、动名词、介词短语 |
+| `clause` | 🔷 | `#0e7490` | **限定从句**：宾语/表语/主语/同位语/定语/状语从句、存在句 |
+| `coord` | 🟢 | `#4d7c0f` | 并列（并列谓语、并列主语、并列结果） |
 | `contrast` | 🔴 | `#be123c` | 转折、让步、对比、过渡、判断、结论、收束 |
 
 > 色值定义在 `template.html` 与 `build_mobile.py` 的 `:root`（`--r-skeleton` 等），两份**必须一致**。

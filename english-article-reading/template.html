@@ -13,14 +13,14 @@
   @page { size: A4; margin: 15mm 14mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   :root {
-    /* 角色色点：一套低饱和、可打印的语义色（不依赖 emoji 字体） */
-    --r-skeleton: #475569;  /* 骨架 / 主语 —— 中性石板灰 */
-    --r-pred:     #0d7d74;  /* 谓语 / 动作 —— 深青 */
+    /* 角色色点：一套高辨识、可打印的语义色（不依赖 emoji 字体） */
+    --r-skeleton: #334155;  /* 骨架 / 主语 —— 深石板 */
+    --r-pred:     #0f766e;  /* 谓语 / 动作 —— 深青 */
     --r-obj:      #b45309;  /* 宾语 / 施事 —— 暖褐 */
-    --r-attr:     #7c3aed;  /* 定语 / 同位语 —— 紫 */
-    --r-adv:      #2563eb;  /* 非谓语状语 —— 蓝 */
-    --r-clause:   #0891b2;  /* 限定从句 —— 青蓝 */
-    --r-coord:    #65a30d;  /* 并列 —— 橄榄绿 */
+    --r-attr:     #6d28d9;  /* 定语 / 同位语 —— 紫 */
+    --r-adv:      #1d4ed8;  /* 非谓语状语 —— 蓝 */
+    --r-clause:   #0e7490;  /* 限定从句 —— 青蓝 */
+    --r-coord:    #4d7c0f;  /* 并列 —— 橄榄绿 */
     --r-contrast: #be123c;  /* 转折 / 过渡 —— 玫红 */
     --brk-line:   #cbd5e1;
     --brk-bg:     #fafbfc;
@@ -80,8 +80,9 @@
   .speech .brk .n { color: #94a3b8; font-weight: bold; font-family: 'DejaVu Sans', monospace; margin-right: 3px; }
   /* 角色色点：CSS 画的小圆点，跨平台一致、可打印、可精确调色 */
   .speech .brk .role {
-    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-    margin: 0 5px 0 1px; vertical-align: 1px; background: var(--r-skeleton);
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    margin: 0 5px 0 1px; vertical-align: 0; background: var(--r-skeleton);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .9);
   }
   .speech .brk .role[data-cat="skeleton"] { background: var(--r-skeleton); }
   .speech .brk .role[data-cat="pred"]     { background: var(--r-pred); }
