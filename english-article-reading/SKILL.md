@@ -9,9 +9,10 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 标准范例见 `/home/crf/english/speech/2026-08-27-I-Have-a-Dream.html`（桌面）、
 `...-手机版.html`（手机）与 `...pdf`（A4），本技能就是从它抽象出来的。
 
-**工具文件**：`template.html`（桌面模板）、`build_article.py`（数据 → HTML 生成器）、
+**工具文件**：`template.html`（桌面模板）、`build_article.py`（数据 → HTML 生成器，含层级自动推断）、
 `build_mobile.py`（桌面 HTML → 手机版）、`read_aloud.css` / `read_aloud.js`（朗读功能）、
-`add_read_aloud.py`（给已有页面补朗读）、`examples/steve_jobs_stanford.py`（长文完整示例）。
+`add_read_aloud.py`（给已有页面补朗读）、`relayout.py`（把旧页面迁移到分层格式）、
+`examples/steve_jobs_stanford.py`（长文完整示例）。
 
 > **每篇文章都必须产出「三件套」，缺一不可：**
 > ① 桌面版 HTML　② 手机版 HTML　③ A4 PDF。
@@ -134,6 +135,41 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 
 > **按 `mod` 的写法自查**：读一遍所有 `.mod`，如果读出来的是一串语法名词，
 > 说明写失败了；如果读出来像「这块在告诉我被收养的时间和由谁来做」，就对了。
+
+### 2.4 层级可以自动推断（老模块不必手写层级）
+
+`build_article.py` 里 `INFER_LAYOUT = True`（默认开）。**当一句里的色块都没写第 4 个元素
+（层级）时**，脚本按下面的规则自动推断，老的三元组模块也能得到树形：
+
+1. 骨架类标签（主句/分句/主谓/主语/谓语/祈使/并列/短句/插入语…）→ `d0`；
+2. 句首的修饰语（前面还没出现骨架）→ 也留 `d0`，避免句子以缩进行开头；
+3. 其余修饰语 → 紧跟骨架时 `d1`，连续出现则逐层 +1，**上限 `d3`**。
+
+这只是可预期的近似（例如把并列分句当成修饰语时会偏深）。要覆盖某句的判断，
+在该句色块里显式写第 4 个元素即可——**只要有一块显式写了层级，整句就不再自动推断**。
+设 `INFER_LAYOUT = False` 可整体关闭。
+
+### 2.5 把旧页面迁移到新格式：`relayout.py`
+
+早期生成的精读页是平铺列表 + 旧色盘。迁移不必重做内容：
+
+```bash
+python3 /home/crf/.claude/skills/english-article-reading/relayout.py <页面.html>
+```
+
+它**只重写两处**：`<style>`（换成当前模板 CSS，并保留该页原有的自定义 `.refrain.*` 配色）
+与每个 `.sent`/`.brk` 块（新色盘、层级、角色色点、mod）。**其它一律不动**——背景、词源、
+修辞、跟读、金句、自测、答案，以及 `data-audio` 等音频属性都原样保留，所以对有音频的页面安全。
+迁移后记得重跑 `build_mobile.py` 与 PDF。
+
+> ⚠️ **前提是拆解行与色块 1:1**。若旧页面里作者把多个色块合并成了一行（`.sg` 用「…」缩写），
+> 先补齐再迁移，或用 `--fix` 传入逐块覆盖：
+> ```bash
+> python3 relayout.py <页面.html> --fix examples/i-have-a-dream-fix.json
+> ```
+> JSON 形如 `{"8": [["时间状语", "排比第三击：一百年后"], ...]}`，键是句中序号（从 1 开始）。
+> `examples/i-have-a-dream-fix.json` 是修 `I Have a Dream` 6 句合并行的实例。
+
 
 
 > **只写一次标题**：不要每句重复「句子结构分色 · 色块 ↔ 拆解行 ↔ 汉语解释」。

@@ -59,6 +59,14 @@ REL_EMOJI = {
     "过渡": "🔴", "结果": "🔴", "判断": "🔴", "结论": "🔴",
     # 短句类同义标签统一归为骨架
     "短句": "🔵", "强调": "🔵", "祝词": "🔵", "致谢": "🔵", "语气": "🔵", "虚拟": "🔵",
+    # 修辞/语义类自由标签（老页面常用，非语法术语）
+    "核心": "🔵", "占位": "🔵",
+    "指代": "🟡",
+    "内容": "🟠", "给谁": "🟠", "转述": "🟠", "引文": "🟠", "引歌": "🟠", "引语续": "🟠",
+    "副歌": "🟠",
+    "排比": "🟤", "对仗": "🟤",
+    "劝告": "🟢", "揭示": "🟢", "揭晓": "🟢", "回应": "🟢", "回答": "🟢",
+    "路径": "🟣", "位置": "🟣", "软化": "🟣", "目标": "🟣", "双重否定": "🟣", "伴随": "🟣",
     # 实测存在的复合标签，直接钉死其唯一归属
     "从句主句": "🩵",
 }
@@ -207,6 +215,33 @@ def _usable(*cands):
     return ""
 
 
+# 关系名去掉这些语法后缀后，往往剩一个可读的语义词（时间状语 → 时间）
+GRAMMAR_SUFFIXES = ("从句", "状语", "定语", "短语", "结构", "成分")
+# 语义词 → 人话（用于兜底 mod；比「补充前面的动作」具体得多）
+NATURAL = {
+    "时间": "发生的时间", "地点": "发生的地点", "目的": "目的",
+    "原因": "原因", "条件": "条件", "方式": "方式", "范围": "范围",
+    "事由": "事由", "时长": "持续多久", "方向": "方向", "起点": "起点",
+    "终点": "终点", "工具": "用什么", "比较": "比较的对象", "对象": "对象",
+    "补充": "补充说明", "修饰": "修饰的对象",
+    "宾语": "动词的宾语内容", "表语": "主语是什么", "补语": "补充说明",
+    "定语": "是哪一个 / 什么样的", "同位": "同位说明", "插入": "插入的说明",
+    "分词": "伴随的动作", "不定式": "要做的动作", "动名词": "动作本身",
+    "引语": "引述的原话", "疑问": "疑问的内容", "施事": "由谁来做",
+    "受事": "承受动作的一方",
+}
+
+
+def _natural(rel, tag):
+    """把「时间状语」这类关系名剥成「时间」，再映射成「发生的时间」。"""
+    c = (rel or tag or "").strip()
+    for suf in GRAMMAR_SUFFIXES:
+        if c.endswith(suf) and len(c) > len(suf):
+            c = c[: -len(suf)]
+    c = REL_SEP.split(c)[0].strip()
+    return NATURAL.get(c, "")
+
+
 def infer_mod(rel, tag, depth, emoji, author_mod):
     """`mod` 缺省时的兜底描述——**只有作者没写 mod 时才走到这里**。
 
@@ -218,9 +253,9 @@ def infer_mod(rel, tag, depth, emoji, author_mod):
     if depth == 0 and emoji in ("🔵", "🟢"):
         return "全句骨架的一部分"
     act, tgt = MOD_BY_REL.get(emoji, ("补充", "前面的信息"))
-    who = _usable(rel, tag)
+    who = _natural(rel, tag) or _usable(rel, tag)
     if not who:
-        return "%s%s" % (act, tgt)
+        return "%s：%s" % (act, tgt)      # 统一用冒号，避免「骨架全句的主干」这类粘连
     if who == act:
         return who          # 避免「并列：并列」「转折：转折」这类重复
     return "%s：%s" % (act, who)
@@ -305,7 +340,49 @@ def build_branches(metas):
     return out
 
 
+# 未显式给「层级」的句子，是否按规则自动推断（骨架 d0 / 修饰语逐层右挂）。
+# 老模块只有 3 元组，开启后也能得到树形；设 False 则保持全平铺。
+INFER_LAYOUT = True
+
+# 这些标签算「骨架」：它们作为主干并列展开，不往右缩进
+SPINE_WORDS = ("主句", "分句", "主谓", "主语", "谓语", "祈使", "并列", "短句",
+               "开场", "插入语", "倒装", "形式主语", "被动谓语", "从句主句",
+               "祝词", "语气词", "强调")
+
+
+def is_spine(tag):
+    return any(k in (tag or "") for k in SPINE_WORDS)
+
+
+def infer_depths(tags):
+    """按「骨架 d0、修饰语挂到前一个骨架下、连续修饰语逐层加深」推断层级。
+
+    规则是可预期的近似，不是句法分析：
+    - 骨架类标签 → d0；
+    - 句首的修饰语（前面还没有骨架）→ d0，避免句子以缩进行开头；
+    - 其余修饰语 → 紧跟骨架时 d1，连续出现则逐层 +1，上限 d3。
+    个别判断（如并列分句被当作修饰语）仍需人工校正，改模块里的第 4 个元素即可。
+    """
+    out, depth, seen_spine = [], 0, False
+    for i, tag in enumerate(tags):
+        if is_spine(tag):
+            depth, seen_spine = 0, True
+        elif not seen_spine:
+            depth = 0
+        elif i == 0 or is_spine(tags[i - 1]):
+            depth = 1
+        else:
+            depth = min(depth + 1, 3)
+        out.append(depth)
+    return out
+
+
 def render_sentence(pnum, punct, chunks):
+    # 老模块只写 3 元组：先按规则补出层级，再走统一渲染
+    if INFER_LAYOUT and not any(len(c) >= 4 for c in chunks):
+        ds = infer_depths([(c[1] if len(c) > 1 else "") for c in chunks])
+        chunks = [tuple(c) + (d,) for c, d in zip(chunks, ds)]
+
     metas, cks = [], []
     for i, raw in enumerate(chunks):
         text, tag, note, depth, rel, mod, emoji = norm_chunk(raw)
