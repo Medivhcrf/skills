@@ -76,10 +76,10 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 
 ```html
 <div class="brk">
-<div class="ly d0"><span class="chip" style="background:#c3d9f7">1</span><span class="role" data-cat="skeleton" title="🔵 骨架"></span><span class="sg" style="color:#16306b">She felt very strongly</span><span class="mod">全句的主干</span><span class="tg">主句</span><span class="note">骨架只有四个词。feel 是系动词，要用副词 strongly</span></div>
-<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#c2e6ce">2</span><span class="role" data-cat="clause" title="🩵 宾语从句"></span><span class="sg" style="color:#14532d">that I should be adopted</span><span class="mod">补充：她坚决认定的内容</span><span class="tg">宾语从句</span><span class="note">should be adopted 是应然 + 被动</span></div>
-<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#f8dd9e">3</span><span class="role" data-cat="adv" title="🟣 时间"></span><span class="sg" style="color:#6b3f02">at birth</span><span class="mod">补充：那件「被收养」发生在什么时候</span><span class="tg">时间状语</span><span class="note">一出生——时间点</span></div>
-<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#f6c2db">4</span><span class="role" data-cat="obj" title="🟠 施事"></span><span class="sg" style="color:#8a1244">by a lawyer and his wife</span><span class="mod">补充：那件「被收养」由谁来做</span><span class="tg">施事</span><span class="note">三个介词短语排队右挂，汉语要倒过来译</span></div>
+<div class="ly d0"><span class="chip" style="background:#16306b">1</span><span class="role" data-cat="skeleton" title="🔵 骨架"></span><span class="sg" style="color:#16306b">She felt very strongly</span><span class="mod">骨架：全句的主干</span><span class="tg">主句</span><span class="note">骨架只有四个词。feel 是系动词，要用副词 strongly</span></div>
+<div class="ly d1"><span class="tbranch">├─</span><span class="chip" style="background:#0f4023">2</span><span class="role" data-cat="clause" title="🩵 宾语从句"></span><span class="sg" style="color:#0f4023">that I should be adopted</span><span class="mod">补充：她坚决认定的内容</span><span class="tg">宾语从句</span><span class="note">should be adopted 是应然 + 被动</span></div>
+<div class="ly d1"><span class="tbranch">└─</span><span class="chip" style="background:#6b3f02">3</span><span class="role" data-cat="adv" title="🟣 时间"></span><span class="sg" style="color:#6b3f02">at birth</span><span class="mod">补充：那件「被收养」发生在什么时候</span><span class="tg">时间状语</span><span class="note">一出生——时间点</span></div>
+<div class="ly d2"><span class="tbranch">　└─</span><span class="chip" style="background:#8a1244">4</span><span class="role" data-cat="obj" title="🟠 施事"></span><span class="sg" style="color:#8a1244">by a lawyer and his wife</span><span class="mod">补充：那件「被收养」由谁来做</span><span class="tg">施事</span><span class="note">三个介词短语排队右挂，汉语要倒过来译</span></div>
 </div>
 ```
 
@@ -90,10 +90,13 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
   `data-cat` 取 `skeleton / pred / obj / attr / adv / clause / coord / contrast`（见下表），
   emoji 只放在 `title` 里做提示。**不要用 emoji 当可见标记**——缺 emoji 字体的环境（很多 Linux /
   无头 Chrome）会把它们渲染成单色方块，整列标记变成一片灰，配色设计直接失效。
-- `.chip` 的 `background` = 对应 `.ck` 的 `background`（编号 1、2、3…）。
+- **`.chip` 的 `background` 用该色块的「文字色」（深色）**，不是 `.ck` 的浅底色 —— 白字写在浅底色上几乎看不见。
+  编号徽标**不要写固定 `height`/`line-height`**：A4 打印缩放时数字会跑到框外、框被压成细条。
+  模板里用内边距自适应，直接用 `.chip` 类即可（生成器会自动填深色底）。
+- `.pnum`（句子编号 `P1`）同样是深灰实心徽标，和正文明确分开。
 - `.tbranch` 树形连线**手写**（`├─` / `└─` / `│` / 全角空格）；用生成器时自动算好。
 - `.sg` 的 `color` 和文本 = 对应 `.ck` 的 `color` 和文本。
-- `.tg` 语法术语（灰色小字）：只当索引，写规范说法即可；与 `.mod` 重复时可省略。
+- `.tg` 语法术语（灰色小字）：只当索引，写规范说法即可；**若 `.mod` 已把它说进去，生成器会自动省略**（避免「说明：做什么 · 做什么」）。
 - `.note` 讲语法点 / 易错点 / 修辞作用，**不要重复 `.mod` 已经说过的**。
   若要在 note 里指代某个色点，**别写 emoji**（会变方块），写文字：`是从句（从句色）不是短语（状语色）`。
   生成器会自动把 note 里的角色 emoji 换成这套文字说法。
@@ -141,9 +144,19 @@ description: 把英语文章做成「全文精读」页时使用：用户给原�
 `build_article.py` 里 `INFER_LAYOUT = True`（默认开）。**当一句里的色块都没写第 4 个元素
 （层级）时**，脚本按下面的规则自动推断，老的三元组模块也能得到树形：
 
-1. 骨架类标签（主句/分句/主谓/主语/谓语/祈使/并列/短句/插入语…）→ `d0`；
+1. 骨架类标签（骨架/主干/主句/分句/主谓/主语/谓语/祈使/并列/短句/插入语…）→ `d0`；
 2. 句首的修饰语（前面还没出现骨架）→ 也留 `d0`，避免句子以缩进行开头；
-3. 其余修饰语 → 紧跟骨架时 `d1`，连续出现则逐层 +1，**上限 `d3`**。
+3. 紧跟骨架的修饰语 → `d1`；
+4. 之后出现的修饰语：**只有名词性依赖（定语/同位语、宾语）才 +1 下钻**，
+   其余（时间/地点/方式等状语）**回到 `d1`** —— 它们是与主干并列的修饰语，
+   不是上一块的子成分。若不加这条限制，`today → 占位 → 揭晓` 会被串成 `d2/d3` 的假阶梯；
+5. 深度上限 `d3`。
+
+> ⚠️ **骨架词表要够全**：`SPINE_WORDS` 漏一个词就可能整页失效。
+> 踩过的坑：表里漏了「骨架」，而某页的标签恰好全用「骨架」，于是
+> `is_spine()` 恒为 False、`seen_spine` 永不成立，**整句色块全被推成 `d0`**
+> （层级消失），且 `d0` 行又统一拿到兜底文案，出现「6 行里 4 行同一句话」。
+> 改词表后请用真实标签跑一遍 `infer_depths()` 自测。
 
 这只是可预期的近似（例如把并列分句当成修饰语时会偏深）。要覆盖某句的判断，
 在该句色块里显式写第 4 个元素即可——**只要有一块显式写了层级，整句就不再自动推断**。

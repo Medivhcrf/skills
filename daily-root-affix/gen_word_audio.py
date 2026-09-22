@@ -3,9 +3,14 @@
 """为词根/词缀页的单词与例句生成神经网络发音，并注入 data-say（按内容去重共享）。
 
 用法:
-    python3 gen_word_audio.py <file1.html> [file2.html ...] [--voice en-US-AriaNeural] [--force]
+    python3 gen_word_audio.py <file1.html> [file2.html ...] \\
+        [--voice en-US-AriaNeural] [--force] [--site-root /home/crf/english]
 
-- 音频存到 <首文件所在目录>/words-audio/<md5>.mp3，跨页按文本去重；
+- 音频存到 **站点根目录** 的 `words-audio/<md5>.mp3`，跨页按文本去重共享。
+  注意不是「页面所在目录」——页面已归档在 `daily/` 等子目录里，
+  站点根由 `--site-root` 指定（默认 /home/crf/english），
+  找不到时向上探测含 `words-audio/` 或 `index.html` 的目录；
+  注入的引用按**每个页面**到 words-audio/ 的相对位置生成（子目录里即 `../words-audio/`）。
 - 目标：每个 <li> 与 .usage 里的第一个 <b>，以及表格 <td class="w"> 里的第一个 <b>；
   表格单元格若混有中文（如 "capture 捕获, receive"），只对英文部分发音；
 - 页面 pronounce.js 优先播放音频，缺失时回退系统语音。需要联网。
