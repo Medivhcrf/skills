@@ -22,6 +22,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # 别在 examples/ 里拉 __pycache__
+
 DEFAULT_OUT = Path("/home/crf/english/shift")
 
 # ── 站点配色（与 /home/crf/english 其余页面一致） ────────────────────
