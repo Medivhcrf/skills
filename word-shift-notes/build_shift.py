@@ -122,6 +122,46 @@ def render_quote(quote):
     return f'<blockquote>{text}{cite}</blockquote>'
 
 
+MARKS = {
+    "ok": ("✓", "ok"), "✓": ("✓", "ok"),
+    "no": ("✗", "no"), "✗": ("✗", "no"),
+    "warn": ("△", "warn"), "△": ("△", "warn"),
+}
+
+
+def render_examples(examples, tail=""):
+    """用法例子：每个词一张卡，卡里逐句标 ✓ / ✗ / △。"""
+    if not examples:
+        return ""
+    out = []
+    for row in examples:
+        word, use, items = _tup(row, 3, [])
+        out.append('<div class="ex">')
+        head = f'<span class="word">{word}</span>'
+        if use:
+            head += f'<span class="use">{use}</span>'
+        out.append(f'  <div class="ex-head">{head}</div>')
+        for it in (items or []):
+            mark, en, cn, note, src = _tup(it, 5)
+            glyph, cls = MARKS.get(str(mark).strip().lower(), ("·", "warn"))
+            src_html = f'<span class="src">{src}</span>' if src else ""
+            note_html = f'<p class="note">{note}{src_html}</p>' if (note or src) else ""
+            out.append(
+                f'  <div class="ex-row {cls}">'
+                f'<span class="mark">{glyph}</span>'
+                f'<div class="ex-body">'
+                f'<p class="en">{en}</p>'
+                f'<p class="cn">{cn}</p>'
+                f'{note_html}'
+                f'</div></div>'
+            )
+        out.append('</div>')
+    body = "\n".join(out)
+    if tail:
+        body += "\n" + tail
+    return body
+
+
 def render_duty(duty):
     if not duty:
         return ""
@@ -148,6 +188,7 @@ SECTIONS = [
     ("词典释义（英文原文）", "senses", "只引真实辞书，标记出处；释义原文照抄，不改写"),
     ("词源本义", "etym", "本义看词根，不看现在的常用义"),
     ("错位是怎么产生的", "insight", None),
+    ("用法例子", "examples", "✓ 能用 ｜ ✗ 不能用 ｜ △ 勉强可通但不自然"),
     ("分工表", "duty", "哪个词管哪种场合，一眼看全"),
     ("可迁移的规律", "rules", None),
 ]
@@ -165,6 +206,7 @@ def render_body(mod):
         "senses": render_senses(_g(mod, "SENSES", [])),
         "etym": render_etym(_g(mod, "ETYM", [])) + render_quote(_g(mod, "ETYM_QUOTE")),
         "insight": _g(mod, "INSIGHT", ""),
+        "examples": render_examples(_g(mod, "EXAMPLES", []), _g(mod, "EXAMPLES_TAIL", "")),
         "duty": render_duty(_g(mod, "DUTY", [])),
         "rules": render_rules(_g(mod, "RULES", [])),
     }
@@ -263,6 +305,43 @@ CSS = f"""
   .sense .warn {{ margin-top: 4px; font-size: 9.3pt; color: {CRIMSON_2}; }}
   .sense .warn::before {{ content: "⚠ "; }}
 
+  /* §4 用法例子 */
+  .ex {{
+    border: 1px solid {LINE}; border-radius: 8px;
+    padding: 9px 11px 10px; margin-bottom: 10px;
+  }}
+  .ex:last-of-type {{ margin-bottom: 0; }}
+  .ex-head {{ margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #eef2f7; }}
+  .ex-head .word {{
+    font-family: 'DejaVu Sans', sans-serif; font-weight: bold;
+    font-size: 11pt; color: {VIOLET}; margin-right: 8px;
+  }}
+  .ex-head .use {{ font-size: 8.8pt; color: {MUTED}; }}
+  .ex-row {{ display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px dashed #f1f5f9; }}
+  .ex-row:last-child {{ border-bottom: none; padding-bottom: 0; }}
+  .ex-row .mark {{
+    flex: none; width: 16px; height: 16px; margin-top: 2px;
+    border-radius: 50%; text-align: center; line-height: 16px;
+    font-size: 8.5pt; font-weight: bold; color: #fff;
+  }}
+  .ex-row.ok .mark {{ background: {GREEN}; }}
+  .ex-row.no .mark {{ background: {CRIMSON_2}; }}
+  .ex-row.warn .mark {{ background: {AMBER}; }}
+  .ex-body {{ min-width: 0; }}
+  .ex-row .en {{
+    font-family: 'DejaVu Sans', 'Noto Sans CJK SC', sans-serif;
+    font-size: 9.8pt; color: {INK};
+  }}
+  .ex-row.no .en {{ color: {CRIMSON_2}; }}
+  .ex-row .cn {{ font-size: 9.3pt; color: {GREEN}; margin-top: 1px; }}
+  .ex-row.no .cn {{ color: {MUTED}; }}
+  .ex-row .note {{ font-size: 8.8pt; color: {MUTED}; margin-top: 2px; }}
+  .ex-row .src {{
+    display: inline-block; margin-left: 5px; padding: 0 5px;
+    border: 1px solid {LINE}; border-radius: 3px;
+    font-size: 7.8pt; color: {MUTED}; background: #f8fafc;
+  }}
+
   /* 表格 */
   .scroll {{ overflow-x: auto; -webkit-overflow-scrolling: touch; }}
   table {{ border-collapse: collapse; width: 100%; font-size: 9.5pt; }}
@@ -342,6 +421,14 @@ MOBILE_CSS = """
     blockquote { font-size: .86rem; }
     .sec code { font-size: .85rem; }
     ol.rules li { font-size: .93rem; }
+
+    .ex { padding: 8px 10px 9px; }
+    .ex-head .word { font-size: 1rem; }
+    .ex-head .use { font-size: .78rem; }
+    .ex-row .en { font-size: .92rem; }
+    .ex-row .cn { font-size: .88rem; }
+    .ex-row .note { font-size: .8rem; }
+    .ex-row .src { font-size: .72rem; }
 
     /* 表格 → 堆叠卡片：手机上不横向滚，一列一列读 */
     .scroll { overflow-x: visible; }
