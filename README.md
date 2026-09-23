@@ -10,6 +10,7 @@
 | `daily-root-affix` | 每日 10 个英语词根词缀（含词源、演化、例句）；另含手机版与单词发音工具 | `YYYY-MM-DD-词根词缀.html` / `.pdf` |
 | `daily-phrasal-verbs` | 每日辨析英语动词词组（phrasal verbs） | HTML / PDF |
 | `english-article-reading` | 英语文章全文精读：背景—逐句分色—词源—修辞—跟读—金句—自测；含数据→HTML 生成器、手机版、朗读 | 桌面 HTML + A4 PDF + 手机版 HTML |
+| `word-shift-notes` | 词义错位：英文原义 × 汉语对应词的错位（词典释义—词源本义—错位成因—分工表—可迁移规律） | 桌面 HTML + 手机版 HTML（站点 `shift/` 章节） |
 | `exam-question-analysis` | 考试/习题解析 + 知识体系扩展 | PDF |
 | `root-affix-review` | 复习历史每日词根词缀，生成复习练习 | PDF |
 
